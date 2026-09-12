@@ -57,7 +57,6 @@ export default function IncidentDetailPage() {
                 </div>
               </div>
               {incident.description && <p className="incident-detail__desc">{incident.description}</p>}
-              <p className="incident-detail__meta">reported by {incident.reported_by ?? 'unknown'}</p>
             </header>
 
             <nav className="incident-tabs">

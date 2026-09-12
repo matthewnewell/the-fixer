@@ -48,21 +48,21 @@
 .incident-detail__inner {
   max-width: 860px;
   margin: 0 auto;
-  padding: 20px 20px 80px;
+  padding: 14px 20px 40px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .incident-detail__header {
-  padding-bottom: 14px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--color-border);
 }
 
 .incident-detail__badges {
   display: flex;
   gap: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .incident-detail__badge {
@@ -82,15 +82,17 @@
 
 .incident-detail__title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .incident-detail__title {
   margin: 0;
-  font-size: 1.4rem;
+  flex: 1;
+  min-width: 0;
+  font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -103,16 +105,10 @@
 }
 
 .incident-detail__desc {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-size: 13px;
   color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-.incident-detail__meta {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: var(--color-text-faint);
+  line-height: 1.4;
 }
 
 .status-select {
@@ -158,7 +154,7 @@
 .incident-tabs__tab {
   border: none;
   background: none;
-  padding: 8px 20px;
+  padding: 6px 16px;
   border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 700;
