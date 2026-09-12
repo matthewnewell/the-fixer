@@ -1,0 +1,238 @@
+.capa-plan-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.capa-plan {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px 80px;
+}
+
+.capa-plan__loading {
+  padding: 40px;
+  color: var(--color-text-faint);
+}
+
+.capa-plan__toolbar {
+  max-width: 720px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.capa-plan__back {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.capa-plan__back:hover {
+  color: var(--color-accent);
+}
+
+.capa-plan__sheet {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.capa-plan__header {
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--color-text);
+}
+
+.capa-plan__kicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+.capa-plan__title {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.capa-plan__facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.capa-plan__facts dt {
+  color: var(--color-text-faint);
+  font-weight: 600;
+}
+
+.capa-plan__facts dd {
+  margin: 0;
+}
+
+.capa-plan__section h2 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-faint);
+}
+
+.capa-plan__section-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.capa-plan__prose {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.capa-plan__prose--muted {
+  color: var(--color-text-faint);
+}
+
+.capa-plan__root-cause {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: var(--color-accent-soft);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.capa-plan__warning {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: var(--color-wait-soft);
+  color: var(--color-wait);
+  border-left: 3px solid var(--color-wait);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.capa-plan__chain {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.capa-plan__chain li {
+  line-height: 1.5;
+}
+
+.capa-plan__chain-q {
+  font-weight: 600;
+}
+
+.capa-plan__chain-a {
+  color: var(--color-text-secondary);
+}
+
+.capa-plan__chain-q::after {
+  content: ' ';
+}
+
+.capa-plan__chain-tag {
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-accent);
+}
+
+.capa-plan__chain-step--root {
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  margin-left: -8px;
+}
+
+.capa-plan__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.capa-plan__table th {
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-faint);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.capa-plan__table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+/* ── status pill colors — same variants as the Cases list ── */
+.status-pill--open {
+  background: var(--color-wait-soft);
+  color: var(--color-wait);
+}
+
+.status-pill--investigating {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+}
+
+.status-pill--closed {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.capa-plan__generated {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-text-faint);
+  text-align: right;
+}
+
+@media print {
+  .fx-nav,
+  .capa-plan__toolbar {
+    display: none;
+  }
+
+  .capa-plan-layout,
+  .capa-plan {
+    height: auto;
+    overflow: visible;
+  }
+
+  .capa-plan__sheet {
+    border: none;
+    padding: 0;
+  }
+}

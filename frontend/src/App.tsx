@@ -3,6 +3,7 @@ import Nav from './components/Nav'
 import SplashPage from './pages/SplashPage'
 import CasesPage from './pages/CasesPage'
 import IncidentDetailPage from './pages/IncidentDetailPage'
+import CapaPlanPage from './pages/CapaPlanPage'
 import './App.css'
 
 /** Shared chrome for every operational page — same pattern as the sibling apps: the splash
@@ -24,6 +25,7 @@ export default function App() {
       <Route path="/about" element={<SplashPage />} />
       <Route path="/" element={<Layout><CasesPage /></Layout>} />
       <Route path="/incidents/:incidentId" element={<IncidentDetailPage />} />
+      <Route path="/incidents/:incidentId/plan" element={<CapaPlanPage />} />
     </Routes>
   )
 }

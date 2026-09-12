@@ -34,15 +34,18 @@ export default function IncidentDetailPage() {
                   reported by {incident.reported_by ?? 'unknown'}
                 </p>
               </div>
-              <select
-                className={`status-select status-select--${incident.status}`}
-                value={incident.status}
-                onChange={(e) => updateIncident.mutate({ status: e.target.value as IncidentStatus })}
-              >
-                <option value="open">Open</option>
-                <option value="investigating">Investigating</option>
-                <option value="closed">Closed</option>
-              </select>
+              <div className="incident-detail__header-actions">
+                <Link className="fx-btn fx-btn--ghost" to={`/incidents/${incident.id}/plan`}>📋 CAPA Plan</Link>
+                <select
+                  className={`status-select status-select--${incident.status}`}
+                  value={incident.status}
+                  onChange={(e) => updateIncident.mutate({ status: e.target.value as IncidentStatus })}
+                >
+                  <option value="open">Open</option>
+                  <option value="investigating">Investigating</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
             </header>
 
             <section className="incident-detail__section">
