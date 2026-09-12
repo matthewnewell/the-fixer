@@ -11,16 +11,16 @@ const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caug
 
 const FEATURES = [
   {
-    title: 'Built for your QMS, not against it',
-    body: 'CAPA is an AS9100 requirement, not a suggestion. Root cause, corrective action, and preventive action live together, and nothing closes without verification. When the auditor asks for the record, it already exists.',
+    title: 'An objective voice in the room',
+    body: 'It’s natural to reach for a familiar fix before the evidence supports it. The assistant has no stake in the outcome — it reads the whole chain and offers an objective, AI-guided perspective that helps you catch solution bias early and follow the evidence to the real cause.',
   },
   {
-    title: 'An AI that won’t let you stop early',
-    body: '"Human error" and a restated symptom are the two ways a 5-Whys chain quietly fails. The assistant reads the whole chain and pushes back on the easy answer instead of rubber-stamping it.',
+    title: 'Built for your QMS',
+    body: 'CAPA is an AS9100 requirement. Root cause, corrective action, and preventive action live together, with verification built in. When an auditor asks for evidence, here it is.',
   },
   {
-    title: 'A report your team can act on today',
-    body: 'One page: the problem, the root cause, the corrective fix, the preventive change — owners and due dates included. Generate it and hand it off. Not a file that goes in a drawer.',
+    title: 'Actionable Reports',
+    body: 'One page: the problem, the root cause, the corrective fix, the preventive change — owners and due dates included, ready to generate and share.',
   },
 ]
 
@@ -59,39 +59,43 @@ export default function SplashPage() {
 
           <figure className="splash-figure">
             <Link className="splash-figure__link" to={`/incidents/${DEMO_CASE_ID}`}>
-              <div className="splash-flow">
-                {CHAIN.map((q, i) => (
-                  <div className="splash-flow__item" key={q}>
-                    <div className="splash-flow__node">
-                      <div className="splash-flow__bubble">{i + 1}</div>
-                      <div className="splash-flow__text">{q}</div>
+              <div className="splash-layout">
+                <div className="splash-chain">
+                  <div className="splash-chain__label">5 Whys</div>
+                  {CHAIN.map((q, i) => (
+                    <div key={q} className="splash-chain__step">
+                      <div className="splash-chain__bubble">{i + 1}</div>
+                      <div className="splash-chain__text">{q}</div>
                     </div>
-                    <div className="splash-flow__arrow">→</div>
+                  ))}
+                  <div className="splash-chain__step splash-chain__step--root">
+                    <div className="splash-chain__bubble splash-chain__bubble--root">✓</div>
+                    <div className="splash-chain__text splash-chain__text--root">Root cause: no design-change check against open long-lead orders.</div>
                   </div>
-                ))}
-                <div className="splash-flow__item">
-                  <div className="splash-flow__node splash-flow__node--root">
-                    <div className="splash-flow__bubble splash-flow__bubble--root">✓</div>
-                    <div className="splash-flow__text splash-flow__text--root">Root cause found</div>
-                  </div>
-                  <div className="splash-flow__arrow splash-flow__arrow--big">⇒</div>
                 </div>
-                <div className="splash-flow__capa">
-                  <div className="splash-flow__capa-label">📋 CAPA Plan</div>
-                  <div className="splash-flow__capa-row">
-                    <span className="splash-flow__capa-tag splash-flow__capa-tag--corrective">Corrective</span>
-                    Re-order the casting to the corrected hole pattern.
+                <div className="splash-connector">
+                  <div className="splash-connector__line" />
+                  <div className="splash-connector__head">▶</div>
+                </div>
+                <div className="splash-capa">
+                  <div className="splash-capa__label">📋 CAPA Plan</div>
+                  <div className="splash-capa__row">
+                    <div className="splash-capa__row-top">
+                      <span className="splash-capa__tag splash-capa__tag--corrective">Corrective</span>
+                      <span className="splash-capa__status splash-capa__status--done">Done</span>
+                    </div>
+                    <div className="splash-capa__row-text">Re-order the casting to the corrected hole pattern and expedite.</div>
                   </div>
-                  <div className="splash-flow__capa-row">
-                    <span className="splash-flow__capa-tag splash-flow__capa-tag--preventive">Preventive</span>
-                    Add a long-lead-impact design review check.
+                  <div className="splash-capa__row">
+                    <div className="splash-capa__row-top">
+                      <span className="splash-capa__tag splash-capa__tag--preventive">Preventive</span>
+                      <span className="splash-capa__status splash-capa__status--open">Open</span>
+                    </div>
+                    <div className="splash-capa__row-text">Add a long-lead-impact check to the design change review checklist.</div>
                   </div>
                 </div>
               </div>
             </Link>
-            <figcaption className="splash-figure__caption">
-              A real case, start to finish — click to walk through root cause and CAPA.
-            </figcaption>
           </figure>
 
           <div className="splash-grid">
