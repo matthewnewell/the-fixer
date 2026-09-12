@@ -1,0 +1,23 @@
+# Backend (Python)
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+backend/.pytest_cache/
+backend/instance/
+.env
+
+# SQLite data (local dev database — the seed recreates it on first run)
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Frontend (Node / Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# OS / editor
+.DS_Store
+Thumbs.db

@@ -1,0 +1,117 @@
+.why-chain {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.why-card {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  position: relative;
+}
+
+.why-card::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 44px;
+  bottom: -14px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.why-card:last-child::before {
+  display: none;
+}
+
+.why-card__number {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface-sunken);
+  border: 2px solid var(--color-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  z-index: 1;
+}
+
+.why-card--root .why-card__number {
+  background: var(--color-success-soft);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.why-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.why-card--root .why-card__body {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.why-card__question {
+  border: none;
+  background: none;
+  padding: 0;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.why-card__answer {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  background: var(--color-surface);
+}
+
+.why-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.why-card__root-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.why-card__delete {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 11px;
+  color: var(--color-text-faint);
+}
+
+.why-card__delete:hover {
+  color: var(--color-critical);
+}
+
+.why-chain__add {
+  align-self: flex-start;
+  margin-top: 10px;
+  margin-left: 46px;
+}

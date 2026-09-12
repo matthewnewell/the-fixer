@@ -1,0 +1,138 @@
+.cases-page {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.cases-page__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cases-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cases-page__title {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.cases-page__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.new-case-form {
+  display: flex;
+  gap: 8px;
+}
+
+.new-case-form input {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: 13px;
+  width: 280px;
+}
+
+.cases-page__filters {
+  display: flex;
+  gap: 8px;
+}
+
+.cases-page__filters select {
+  padding: 7px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: 13px;
+}
+
+.cases-page__empty {
+  color: var(--color-text-faint);
+  font-size: 13px;
+}
+
+.case-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.case-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.case-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.case-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.status-pill--open {
+  background: var(--color-wait-soft);
+  color: var(--color-wait);
+}
+
+.status-pill--investigating {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+}
+
+.status-pill--closed {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.case-card__project {
+  font-size: 11px;
+  color: var(--color-text-faint);
+}
+
+.case-card__title {
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.case-card__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.case-card__root--found {
+  color: var(--color-success);
+  font-weight: 700;
+}

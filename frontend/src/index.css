@@ -1,0 +1,130 @@
+:root {
+  --color-bg: #f5f6f9;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f0f1f5;
+  --color-border: #e2e5eb;
+  --color-border-strong: #c7cbd4;
+
+  --color-text: #191c22;
+  --color-text-secondary: #62687a;
+  --color-text-faint: #9198a8;
+
+  /* Same family as Value Stream (indigo), Conway's Depot (teal), Dude-Where's-My-Part
+     (orange) — shifted to violet so the sibling apps read as a family without being
+     identical. */
+  --color-accent: #7c3aed;
+  --color-accent-hover: #6d28d9;
+  --color-accent-soft: #f3ecff;
+
+  --color-critical: #dc2626;
+  --color-critical-soft: #fee2e2;
+  --color-wait: #d97706;
+  --color-wait-soft: #fef3c7;
+  --color-success: #16a34a;
+  --color-success-soft: #dcfce7;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(16, 20, 30, 0.06);
+  --shadow-md: 0 4px 16px rgba(16, 20, 30, 0.08);
+  --shadow-lg: 0 12px 32px rgba(16, 20, 30, 0.14);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--color-accent);
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}
+
+/* ── shared button ── */
+.fx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.fx-btn--primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.fx-btn--primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.fx-btn--primary:disabled {
+  background: var(--color-border-strong);
+  color: var(--color-text-faint);
+}
+
+.fx-btn--ghost {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+.fx-btn--ghost:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-surface-sunken);
+}
+
+/* ── shared status pill ── */
+.status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
