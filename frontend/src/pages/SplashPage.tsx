@@ -15,12 +15,12 @@ const FEATURES = [
     body: 'It’s natural to reach for a familiar fix before the evidence supports it. The assistant has no stake in the outcome — it reads the whole chain and offers an objective, AI-guided perspective that helps you catch solution bias early and follow the evidence to the real cause.',
   },
   {
-    title: 'Built for your QMS',
-    body: 'CAPA is an AS9100 requirement. Root cause, corrective action, and preventive action live together, with verification built in. When an auditor asks for evidence, here it is.',
-  },
-  {
     title: 'Actionable Reports',
     body: 'One page: the problem, the root cause, the corrective fix, the preventive change — owners and due dates included, ready to generate and share.',
+  },
+  {
+    title: 'Built for your QMS',
+    body: 'CAPA is an AS9100 requirement. Root cause, corrective action, and preventive action live together, with verification built in. When an auditor asks for evidence, here it is.',
   },
 ]
 
@@ -78,7 +78,7 @@ export default function SplashPage() {
                   <div className="splash-connector__head">▶</div>
                 </div>
                 <div className="splash-capa">
-                  <div className="splash-capa__label">📋 CAPA Plan</div>
+                  <div className="splash-capa__label">📋 Corrective and Preventive Action Plan</div>
                   <div className="splash-capa__row">
                     <div className="splash-capa__row-top">
                       <span className="splash-capa__tag splash-capa__tag--corrective">Corrective</span>
