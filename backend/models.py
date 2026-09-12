@@ -29,8 +29,9 @@ ACTION_STATUSES = ("open", "in_progress", "done", "verified")
 
 
 class Incident(db.Model):
-    """What failed. `project` is a plain-text label — same cross-app-by-convention pattern as
-    everywhere else in this ecosystem."""
+    """What failed. `project`/`portfolio` are plain-text labels — same cross-app-by-convention
+    pattern as everywhere else in this ecosystem (matches DWMP's Assembly: a portfolio owns
+    projects, a project owns the thing that failed)."""
 
     __tablename__ = "incident"
 
@@ -38,6 +39,7 @@ class Incident(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
     project = db.Column(db.String(200), nullable=True, index=True)
+    portfolio = db.Column(db.String(200), nullable=True, index=True)
     reported_by = db.Column(db.String(120), nullable=True)
     status = db.Column(db.String(20), nullable=False, default="open")  # see INCIDENT_STATUSES
     created_at = db.Column(db.DateTime, default=_now, nullable=False)
@@ -58,6 +60,7 @@ class Incident(db.Model):
             "title": self.title,
             "description": self.description,
             "project": self.project,
+            "portfolio": self.portfolio,
             "reported_by": self.reported_by,
             "status": self.status,
             "created_at": self.created_at.isoformat(),

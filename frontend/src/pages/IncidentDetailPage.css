@@ -80,6 +80,27 @@
   min-width: 0;
 }
 
+.incident-detail__badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.incident-detail__badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--color-surface-sunken);
+  color: var(--color-text-faint);
+}
+
+.incident-detail__badge--project {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+}
+
 .incident-detail__title {
   margin: 0 0 6px;
   font-size: 1.4rem;
@@ -135,10 +156,50 @@
   border-color: transparent;
 }
 
+/* ── Root Cause / CAPA sub-nav ── */
+.incident-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: -8px;
+}
+
+.incident-tabs__tab {
+  border: none;
+  background: none;
+  padding: 8px 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-faint);
+  border-bottom: 2px solid transparent;
+}
+
+.incident-tabs__tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.incident-tabs__tab--active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
 .incident-detail__section {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.incident-detail__section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.incident-detail__section-heading .incident-detail__section-title {
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .incident-detail__section-title {

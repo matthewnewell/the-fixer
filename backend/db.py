@@ -34,7 +34,9 @@ def _set_sqlite_pragma(dbapi_conn, connection_record):
 
 # (table_name, column_name, add_column_sql) — additive-only, run after create_all(). No legacy
 # data to worry about yet; revisit only if a destructive change is ever needed.
-_MIGRATIONS: list[tuple[str, str, str]] = []
+_MIGRATIONS: list[tuple[str, str, str]] = [
+    ("incident", "portfolio", "ALTER TABLE incident ADD COLUMN portfolio VARCHAR(200)"),
+]
 
 
 def _run_migrations(app):

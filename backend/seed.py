@@ -14,6 +14,7 @@ from models import Action, Incident, WhyStep, _now
 DAY = timedelta(days=1)
 _BKT = "Demo: Bracket Assembly Program"
 _NAC = "Demo: Nacelle Fairing Retrofit"
+_PORTFOLIO = "Industrial Programs"  # same demo portfolio DWMP's assemblies sit under
 
 # Fixed (not random-uuid) id for the fully-worked demo case, so the splash page's demo link
 # (and anything else that wants a stable "show me a real one" link, same as Value Stream's
@@ -34,6 +35,7 @@ def seed_if_empty():
             "long-lead casting and about a three-week schedule slip."
         ),
         project=_BKT,
+        portfolio=_PORTFOLIO,
         reported_by="Sam Ortiz (PM)",
         status="closed",
         created_at=_now() - 30 * DAY,
@@ -83,6 +85,7 @@ def seed_if_empty():
         title="Recurring NDT hold on fairing panels",
         description="Fairing panels keep sitting in an NDT hold waiting on inspector availability.",
         project=_NAC,
+        portfolio=_PORTFOLIO,
         reported_by="Dana Kim (PM)",
         status="investigating",
         created_at=_now() - 2 * DAY,

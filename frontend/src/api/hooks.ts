@@ -58,7 +58,7 @@ export function useCreateIncident() {
 export function useUpdateIncident(incidentId: string) {
   const invalidate = useInvalidateIncident(incidentId)
   return useMutation({
-    mutationFn: (data: Partial<Pick<Incident, 'title' | 'description' | 'project' | 'reported_by' | 'status'>>) =>
+    mutationFn: (data: Partial<Pick<Incident, 'title' | 'description' | 'project' | 'portfolio' | 'reported_by' | 'status'>>) =>
       api.put<Incident>(`/incidents/${incidentId}`, data),
     onSuccess: invalidate,
   })

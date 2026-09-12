@@ -37,6 +37,7 @@ export default function CapaPlanPage() {
             <p className="capa-plan__kicker">Corrective &amp; Preventive Action Plan</p>
             <h1 className="capa-plan__title">{incident.title}</h1>
             <dl className="capa-plan__facts">
+              {incident.portfolio && (<><dt>Portfolio</dt><dd>{incident.portfolio}</dd></>)}
               {incident.project && (<><dt>Project</dt><dd>{incident.project}</dd></>)}
               <dt>Reported by</dt><dd>{incident.reported_by ?? 'unknown'}</dd>
               <dt>Status</dt><dd><span className={`status-pill status-pill--${incident.status}`}>{incident.status}</span></dd>

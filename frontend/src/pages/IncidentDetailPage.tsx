@@ -8,12 +8,15 @@ import ActionsList from '../components/ActionsList'
 import ChatPanel from '../components/ChatPanel'
 import './IncidentDetailPage.css'
 
+type Tab = 'root_cause' | 'capa'
+
 export default function IncidentDetailPage() {
   const { incidentId } = useParams<{ incidentId: string }>()
   const { data: incident, isLoading } = useIncident(incidentId)
   const { data: health } = useHealth()
   const updateIncident = useUpdateIncident(incidentId ?? '')
   const [chatOpen, setChatOpen] = useState(false)
+  const [tab, setTab] = useState<Tab>('root_cause')
 
   if (isLoading || !incident) return <div className="incident-detail__loading">Loading…</div>
 
@@ -27,15 +30,15 @@ export default function IncidentDetailPage() {
 
             <header className="incident-detail__header">
               <div className="incident-detail__headline">
+                <div className="incident-detail__badges">
+                  {incident.portfolio && <span className="incident-detail__badge">{incident.portfolio}</span>}
+                  {incident.project && <span className="incident-detail__badge incident-detail__badge--project">{incident.project}</span>}
+                </div>
                 <h1 className="incident-detail__title">{incident.title}</h1>
                 {incident.description && <p className="incident-detail__desc">{incident.description}</p>}
-                <p className="incident-detail__meta">
-                  {incident.project && <>{incident.project} · </>}
-                  reported by {incident.reported_by ?? 'unknown'}
-                </p>
+                <p className="incident-detail__meta">reported by {incident.reported_by ?? 'unknown'}</p>
               </div>
               <div className="incident-detail__header-actions">
-                <Link className="fx-btn fx-btn--ghost" to={`/incidents/${incident.id}/plan`}>📋 CAPA Plan</Link>
                 <select
                   className={`status-select status-select--${incident.status}`}
                   value={incident.status}
@@ -48,15 +51,35 @@ export default function IncidentDetailPage() {
               </div>
             </header>
 
-            <section className="incident-detail__section">
-              <h2 className="incident-detail__section-title">5 Whys</h2>
-              <WhyChain incidentId={incident.id} steps={incident.why_steps ?? []} />
-            </section>
+            <nav className="incident-tabs">
+              <button
+                className={`incident-tabs__tab${tab === 'root_cause' ? ' incident-tabs__tab--active' : ''}`}
+                onClick={() => setTab('root_cause')}
+              >
+                Root Cause
+              </button>
+              <button
+                className={`incident-tabs__tab${tab === 'capa' ? ' incident-tabs__tab--active' : ''}`}
+                onClick={() => setTab('capa')}
+              >
+                CAPA
+              </button>
+            </nav>
 
-            <section className="incident-detail__section">
-              <h2 className="incident-detail__section-title">Corrective &amp; preventive actions</h2>
-              <ActionsList incidentId={incident.id} actions={incident.actions ?? []} />
-            </section>
+            {tab === 'root_cause' ? (
+              <section className="incident-detail__section">
+                <h2 className="incident-detail__section-title">5 Whys</h2>
+                <WhyChain incidentId={incident.id} steps={incident.why_steps ?? []} />
+              </section>
+            ) : (
+              <section className="incident-detail__section">
+                <div className="incident-detail__section-heading">
+                  <h2 className="incident-detail__section-title">Corrective &amp; preventive actions</h2>
+                  <Link className="fx-btn fx-btn--ghost" to={`/incidents/${incident.id}/plan`}>📋 Printable plan</Link>
+                </div>
+                <ActionsList incidentId={incident.id} actions={incident.actions ?? []} />
+              </section>
+            )}
           </div>
         </div>
 

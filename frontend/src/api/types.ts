@@ -5,6 +5,7 @@ export interface Incident {
   title: string
   description: string | null
   project: string | null
+  portfolio: string | null
   reported_by: string | null
   status: IncidentStatus
   created_at: string

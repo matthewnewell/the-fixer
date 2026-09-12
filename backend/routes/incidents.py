@@ -42,6 +42,7 @@ def create_incident():
         title=title,
         description=(body.get("description") or "").strip() or None,
         project=(body.get("project") or "").strip() or None,
+        portfolio=(body.get("portfolio") or "").strip() or None,
         reported_by=(body.get("reported_by") or "").strip() or None,
     )
     db.session.add(incident)
@@ -66,7 +67,7 @@ def update_incident(incident_id):
         incident.status = body["status"]
         incident.closed_at = _now() if body["status"] == "closed" else None
 
-    for field in ("title", "description", "project", "reported_by"):
+    for field in ("title", "description", "project", "portfolio", "reported_by"):
         if field in body:
             setattr(incident, field, body[field])
 

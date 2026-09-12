@@ -3,7 +3,7 @@ import Nav from '../components/Nav'
 import './SplashPage.css'
 
 // Matches backend/seed.py's DEMO_CASE_ID — a fixed (not random-uuid) id on the fully-worked
-// demo case so this page can link straight at a real plan, same as Value Stream's /sample.
+// demo case so this page can link straight at a real case, same as Value Stream's /sample.
 const DEMO_CASE_ID = 'demo-casting-rework'
 
 const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caught?', 'Why is there no check?']
@@ -32,19 +32,18 @@ export default function SplashPage() {
           <header className="splash-hero">
             <h1 className="splash-hero__title">The Fixer</h1>
             <p className="splash-hero__sub">
-              Root cause analysis and corrective/preventive action, guided by an AI root-cause
-              specialist from the first why to the finished plan.
+              AI-guided root cause analysis and CAPA plans.
             </p>
             <div className="splash-hero__actions">
               <Link className="splash-btn splash-btn--primary" to="/">View cases</Link>
-              <Link className="splash-btn splash-btn--ghost" to={`/incidents/${DEMO_CASE_ID}/plan`}>
-                See a real CAPA plan
+              <Link className="splash-btn splash-btn--ghost" to={`/incidents/${DEMO_CASE_ID}`}>
+                Walk through a real case
               </Link>
             </div>
           </header>
 
           <figure className="splash-figure">
-            <Link className="splash-figure__link" to={`/incidents/${DEMO_CASE_ID}/plan`}>
+            <Link className="splash-figure__link" to={`/incidents/${DEMO_CASE_ID}`}>
               <div className="splash-chain">
                 {CHAIN.map((q, i) => (
                   <div key={q} className="splash-chain__step">
@@ -73,7 +72,7 @@ export default function SplashPage() {
               </div>
             </Link>
             <figcaption className="splash-figure__caption">
-              A real case, start to finish — click to open its CAPA plan.
+              A real case, start to finish — click to walk through root cause and CAPA.
             </figcaption>
           </figure>
 
