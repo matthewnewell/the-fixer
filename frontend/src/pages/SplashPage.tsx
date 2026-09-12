@@ -11,8 +11,8 @@ const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caug
 
 const FEATURES = [
   {
-    title: 'An objective voice in the room',
-    body: 'It’s natural to reach for a familiar fix before the evidence supports it. The assistant has no stake in the outcome — it reads the whole chain and offers an objective, AI-guided perspective that helps you catch solution bias early and follow the evidence to the real cause.',
+    title: 'An objective voice',
+    body: 'The assistant has no stake in the outcome — it reads the whole chain and offers an objective, AI-guided perspective that helps you catch solution bias early and follow the evidence to the real cause.',
   },
   {
     title: 'Actionable Reports',
