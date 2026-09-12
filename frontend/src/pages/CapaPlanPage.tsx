@@ -29,7 +29,7 @@ export default function CapaPlanPage() {
       <div className="capa-plan">
         <div className="capa-plan__toolbar">
           <Link className="capa-plan__back" to={`/incidents/${incident.id}`}>← Back to case</Link>
-          <button className="fx-btn fx-btn--primary" onClick={() => window.print()}>Print / save as PDF</button>
+          <button className="fx-btn fx-btn--primary" onClick={() => window.print()}>Generate PDF</button>
         </div>
 
         <div className="capa-plan__sheet">

@@ -44,6 +44,28 @@
   font-size: 1.05rem;
   line-height: 1.6;
   color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.splash-info-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-faint);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+}
+
+.splash-info-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .splash-hero__actions {
@@ -106,33 +128,35 @@
   color: var(--color-text-faint);
 }
 
-.splash-chain {
+/* ── Left-to-right flow: root cause to CAPA in one glance, no scrolling to get the point.
+   Wraps to a second row on narrow viewports rather than forcing a scrollbar. ── */
+.splash-flow {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-width: 480px;
-  margin: 0 auto;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px 0;
 }
 
-.splash-chain__step {
+.splash-flow__item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  position: relative;
-  padding: 6px 0;
 }
 
-.splash-chain__step:not(:last-child)::before {
-  content: '';
-  position: absolute;
-  left: 15px;
-  top: 34px;
-  bottom: -6px;
-  width: 2px;
-  background: var(--color-border);
+.splash-flow__node {
+  width: 104px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
 }
 
-.splash-chain__bubble {
+.splash-flow__node--root {
+  width: 116px;
+}
+
+.splash-flow__bubble {
   flex-shrink: 0;
   width: 32px;
   height: 32px;
@@ -145,53 +169,54 @@
   font-weight: 700;
   font-size: 13px;
   color: var(--color-text-secondary);
-  z-index: 1;
 }
 
-.splash-chain__bubble--root {
+.splash-flow__bubble--root {
   background: var(--color-success-soft);
   border-color: var(--color-success);
   color: var(--color-success);
 }
 
-.splash-chain__text {
-  font-size: 13px;
+.splash-flow__text {
+  font-size: 12px;
+  line-height: 1.35;
   color: var(--color-text);
 }
 
-.splash-chain__text--root {
+.splash-flow__text--root {
   font-weight: 700;
   color: var(--color-success);
 }
 
-.splash-chain__step--connector {
-  padding: 0;
-  justify-content: center;
-}
-
-.splash-chain__step--connector::before {
-  display: none;
-}
-
-.splash-chain__connector {
-  width: 100%;
+.splash-flow__arrow {
+  flex-shrink: 0;
+  width: 22px;
   text-align: center;
   color: var(--color-text-faint);
   font-size: 16px;
+  align-self: center;
+  margin-top: -20px;
 }
 
-.splash-chain__capa {
-  margin-top: 4px;
-  padding: 14px 16px;
+.splash-flow__arrow--big {
+  width: 28px;
+  font-size: 20px;
+  color: var(--color-accent);
+}
+
+.splash-flow__capa {
+  align-self: center;
+  padding: 12px 14px;
   background: var(--color-accent-soft);
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  width: 240px;
 }
 
-.splash-chain__capa-label {
+.splash-flow__capa-label {
   font-weight: 700;
   font-size: 12px;
   text-transform: uppercase;
@@ -199,15 +224,17 @@
   color: var(--color-accent-hover);
 }
 
-.splash-chain__capa-row {
+.splash-flow__capa-row {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 13px;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
   color: var(--color-text);
+  line-height: 1.35;
 }
 
-.splash-chain__capa-tag {
+.splash-flow__capa-tag {
+  align-self: flex-start;
   flex-shrink: 0;
   font-size: 10px;
   font-weight: 700;
@@ -217,15 +244,72 @@
   border-radius: 999px;
 }
 
-.splash-chain__capa-tag--corrective {
+.splash-flow__capa-tag--corrective {
   background: var(--color-wait-soft);
   color: var(--color-wait);
 }
 
-.splash-chain__capa-tag--preventive {
+.splash-flow__capa-tag--preventive {
   background: var(--color-surface);
   color: var(--color-accent-hover);
   border: 1px solid var(--color-accent);
+}
+
+/* ── info modal ── */
+.splash-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 20, 30, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+
+.splash-modal {
+  position: relative;
+  max-width: 480px;
+  width: 100%;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.splash-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.splash-modal__close:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.splash-modal__title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.splash-modal__body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
 }
 
 .splash-grid {

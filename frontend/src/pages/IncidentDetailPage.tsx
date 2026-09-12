@@ -17,6 +17,10 @@ export default function IncidentDetailPage() {
   const updateIncident = useUpdateIncident(incidentId ?? '')
   const [chatOpen, setChatOpen] = useState(false)
   const [tab, setTab] = useState<Tab>('root_cause')
+  // Every case opens read-only — a document you scan, not a form you're dropped into. Applies
+  // uniformly (not just closed cases): editing is one click away, but the default should never
+  // look like a data-entry screen.
+  const [whyEditing, setWhyEditing] = useState(false)
 
   if (isLoading || !incident) return <div className="incident-detail__loading">Loading…</div>
 
@@ -26,29 +30,34 @@ export default function IncidentDetailPage() {
       <div className="incident-layout__row">
         <div className="incident-detail">
           <div className="incident-detail__inner">
-            <Link className="incident-detail__back" to="/">← Cases</Link>
-
             <header className="incident-detail__header">
-              <div className="incident-detail__headline">
-                <div className="incident-detail__badges">
-                  {incident.portfolio && <span className="incident-detail__badge">{incident.portfolio}</span>}
-                  {incident.project && <span className="incident-detail__badge incident-detail__badge--project">{incident.project}</span>}
-                </div>
+              <div className="incident-detail__badges">
+                {incident.portfolio && <span className="incident-detail__badge">{incident.portfolio}</span>}
+                {incident.project && <span className="incident-detail__badge incident-detail__badge--project">{incident.project}</span>}
+              </div>
+              <div className="incident-detail__title-row">
                 <h1 className="incident-detail__title">{incident.title}</h1>
-                {incident.description && <p className="incident-detail__desc">{incident.description}</p>}
-                <p className="incident-detail__meta">reported by {incident.reported_by ?? 'unknown'}</p>
+                <div className="incident-detail__title-actions">
+                  {tab === 'root_cause' ? (
+                    <button className="fx-btn fx-btn--ghost" onClick={() => setWhyEditing((v) => !v)}>
+                      {whyEditing ? 'Done editing' : '✎ Edit'}
+                    </button>
+                  ) : (
+                    <Link className="fx-btn fx-btn--ghost" to={`/incidents/${incident.id}/plan`}>📄 Generate Report</Link>
+                  )}
+                  <select
+                    className={`status-select status-select--${incident.status}`}
+                    value={incident.status}
+                    onChange={(e) => updateIncident.mutate({ status: e.target.value as IncidentStatus })}
+                  >
+                    <option value="open">Open</option>
+                    <option value="investigating">Investigating</option>
+                    <option value="closed">Closed</option>
+                  </select>
+                </div>
               </div>
-              <div className="incident-detail__header-actions">
-                <select
-                  className={`status-select status-select--${incident.status}`}
-                  value={incident.status}
-                  onChange={(e) => updateIncident.mutate({ status: e.target.value as IncidentStatus })}
-                >
-                  <option value="open">Open</option>
-                  <option value="investigating">Investigating</option>
-                  <option value="closed">Closed</option>
-                </select>
-              </div>
+              {incident.description && <p className="incident-detail__desc">{incident.description}</p>}
+              <p className="incident-detail__meta">reported by {incident.reported_by ?? 'unknown'}</p>
             </header>
 
             <nav className="incident-tabs">
@@ -62,21 +71,16 @@ export default function IncidentDetailPage() {
                 className={`incident-tabs__tab${tab === 'capa' ? ' incident-tabs__tab--active' : ''}`}
                 onClick={() => setTab('capa')}
               >
-                CAPA
+                Corrective &amp; Preventive Actions
               </button>
             </nav>
 
             {tab === 'root_cause' ? (
-              <section className="incident-detail__section">
-                <h2 className="incident-detail__section-title">5 Whys</h2>
-                <WhyChain incidentId={incident.id} steps={incident.why_steps ?? []} />
+              <section className="incident-detail__section" aria-label="Root cause">
+                <WhyChain incidentId={incident.id} steps={incident.why_steps ?? []} editing={whyEditing} />
               </section>
             ) : (
-              <section className="incident-detail__section">
-                <div className="incident-detail__section-heading">
-                  <h2 className="incident-detail__section-title">Corrective &amp; preventive actions</h2>
-                  <Link className="fx-btn fx-btn--ghost" to={`/incidents/${incident.id}/plan`}>📋 Printable plan</Link>
-                </div>
+              <section className="incident-detail__section" aria-label="Corrective and preventive actions">
                 <ActionsList incidentId={incident.id} actions={incident.actions ?? []} />
               </section>
             )}

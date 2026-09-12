@@ -46,38 +46,17 @@
 }
 
 .incident-detail__inner {
-  max-width: 800px;
+  max-width: 860px;
   margin: 0 auto;
-  padding: 24px 20px 80px;
+  padding: 20px 20px 80px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.incident-detail__back {
-  align-self: flex-start;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-decoration: none;
-}
-
-.incident-detail__back:hover {
-  color: var(--color-accent);
+  gap: 16px;
 }
 
 .incident-detail__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  padding-bottom: 16px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--color-border);
-  flex-wrap: wrap;
-}
-
-.incident-detail__headline {
-  min-width: 0;
 }
 
 .incident-detail__badges {
@@ -101,34 +80,43 @@
   color: var(--color-accent-hover);
 }
 
+.incident-detail__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .incident-detail__title {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
-.incident-detail__desc {
-  margin: 0 0 6px;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-.incident-detail__meta {
-  margin: 0;
-  font-size: 12px;
-  color: var(--color-text-faint);
-}
-
-.incident-detail__header-actions {
+.incident-detail__title-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
 }
 
+.incident-detail__desc {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.incident-detail__meta {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
 .status-select {
+  flex-shrink: 0;
   padding: 7px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border-strong);
@@ -156,59 +144,39 @@
   border-color: transparent;
 }
 
-/* ── Root Cause / CAPA sub-nav ── */
+/* ── Root Cause / CAPA sub-nav — a segmented control, not an understated underline: the user
+   should see at a glance which half of the case they're looking at. ── */
 .incident-tabs {
-  display: flex;
-  gap: 4px;
-  margin-top: -8px;
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-md);
+  width: fit-content;
 }
 
 .incident-tabs__tab {
   border: none;
   background: none;
-  padding: 8px 4px;
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 700;
-  color: var(--color-text-faint);
-  border-bottom: 2px solid transparent;
-}
-
-.incident-tabs__tab:hover {
   color: var(--color-text-secondary);
 }
 
+.incident-tabs__tab:hover {
+  color: var(--color-text);
+}
+
 .incident-tabs__tab--active {
+  background: var(--color-surface);
   color: var(--color-accent);
-  border-bottom-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
 }
 
 .incident-detail__section {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.incident-detail__section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.incident-detail__section-heading .incident-detail__section-title {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.incident-detail__section-title {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-text-faint);
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--color-border);
 }

@@ -73,6 +73,39 @@
   color: var(--color-text);
 }
 
+.why-card__question-text {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.why-card__answer-text {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.why-card__answer-text--empty {
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.why-card__root-tag {
+  align-self: flex-start;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-success);
+}
+
+.why-chain__empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-faint);
+}
+
 .why-card__answer {
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
