@@ -38,13 +38,6 @@ export default function IncidentDetailPage() {
               <div className="incident-detail__title-row">
                 <h1 className="incident-detail__title">{incident.title}</h1>
                 <div className="incident-detail__title-actions">
-                  {tab === 'root_cause' ? (
-                    <button className="fx-btn fx-btn--ghost" onClick={() => setWhyEditing((v) => !v)}>
-                      {whyEditing ? 'Done editing' : '✎ Edit'}
-                    </button>
-                  ) : (
-                    <Link className="fx-btn fx-btn--ghost" to={`/incidents/${incident.id}/plan`}>📄 Generate Report</Link>
-                  )}
                   <select
                     className={`status-select status-select--${incident.status}`}
                     value={incident.status}
@@ -54,6 +47,14 @@ export default function IncidentDetailPage() {
                     <option value="investigating">Investigating</option>
                     <option value="closed">Closed</option>
                   </select>
+                  <Link className="fx-btn fx-btn--ghost" to={`/incidents/${incident.id}/plan`} title="Generate the full report">📄 Generate Report</Link>
+                  <button
+                    className="fx-btn fx-btn--ghost"
+                    onClick={() => setWhyEditing((v) => !v)}
+                    title="Edit the 5-Whys chain"
+                  >
+                    {whyEditing ? 'Done editing' : '✎ Edit'}
+                  </button>
                 </div>
               </div>
               {incident.description && <p className="incident-detail__desc">{incident.description}</p>}
