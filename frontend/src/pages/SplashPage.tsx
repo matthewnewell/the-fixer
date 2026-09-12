@@ -32,8 +32,8 @@ export default function SplashPage() {
           <header className="splash-hero">
             <h1 className="splash-hero__title">The Fixer</h1>
             <p className="splash-hero__sub">
-              Root cause analysis and corrective/preventive action, guided as you work — not a
-              form you fill out after the fact.
+              Root cause analysis and corrective/preventive action, guided by an AI root-cause
+              specialist from the first why to the finished plan.
             </p>
             <div className="splash-hero__actions">
               <Link className="splash-btn splash-btn--primary" to="/">View cases</Link>
