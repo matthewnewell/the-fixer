@@ -68,44 +68,6 @@
   color: var(--color-accent);
 }
 
-.splash-hero__actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 6px;
-}
-
-.splash-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 11px 20px;
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-decoration: none;
-  border: 1px solid transparent;
-}
-
-.splash-btn--primary {
-  background: var(--color-accent);
-  color: #fff;
-}
-
-.splash-btn--primary:hover {
-  background: var(--color-accent-hover);
-}
-
-.splash-btn--ghost {
-  background: var(--color-surface);
-  border-color: var(--color-border-strong);
-  color: var(--color-text-secondary);
-}
-
-.splash-btn--ghost:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
 .splash-figure {
   margin: 0;
   padding: 24px;

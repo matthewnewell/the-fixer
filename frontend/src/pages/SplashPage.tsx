@@ -4,7 +4,8 @@ import Nav from '../components/Nav'
 import './SplashPage.css'
 
 // Matches backend/seed.py's DEMO_CASE_ID — a fixed (not random-uuid) id on the fully-worked
-// demo case so this page can link straight at a real case, same as Value Stream's /sample.
+// demo case. The splash figure still links here directly; the hero-level "Demo"/"Cases"
+// buttons moved up into the navbar itself (Demo | Cases | New Case) so they don't duplicate it.
 const DEMO_CASE_ID = 'demo-casting-rework'
 
 const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caught?', 'Why is there no check?']
@@ -51,10 +52,6 @@ export default function SplashPage() {
                 ?
               </button>
             </p>
-            <div className="splash-hero__actions">
-              <Link className="splash-btn splash-btn--ghost" to={`/incidents/${DEMO_CASE_ID}`}>Demo</Link>
-              <Link className="splash-btn splash-btn--primary" to="/">Cases</Link>
-            </div>
           </header>
 
           <figure className="splash-figure">
