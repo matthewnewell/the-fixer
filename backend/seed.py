@@ -15,6 +15,11 @@ DAY = timedelta(days=1)
 _BKT = "Demo: Bracket Assembly Program"
 _NAC = "Demo: Nacelle Fairing Retrofit"
 
+# Fixed (not random-uuid) id for the fully-worked demo case, so the splash page's demo link
+# (and anything else that wants a stable "show me a real one" link, same as Value Stream's
+# /sample) can point straight at it without looking anything up first.
+DEMO_CASE_ID = "demo-casting-rework"
+
 
 def seed_if_empty():
     if Incident.query.count() > 0:
@@ -22,6 +27,7 @@ def seed_if_empty():
 
     # ── Incident 1: closed, root cause found, both action types ──
     casting = Incident(
+        id=DEMO_CASE_ID,
         title="Long-lead casting re-ordered after CDR — design defect escaped to Build",
         description=(
             "A design defect in the bracket wasn't caught until Build, forcing a re-buy of the "

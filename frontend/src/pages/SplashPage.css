@@ -73,6 +73,17 @@
   background: var(--color-accent-hover);
 }
 
+.splash-btn--ghost {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-secondary);
+}
+
+.splash-btn--ghost:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
 .splash-figure {
   margin: 0;
   padding: 24px;
@@ -80,6 +91,19 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+}
+
+.splash-figure__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.splash-figure__caption {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-faint);
 }
 
 .splash-chain {
@@ -138,6 +162,70 @@
 .splash-chain__text--root {
   font-weight: 700;
   color: var(--color-success);
+}
+
+.splash-chain__step--connector {
+  padding: 0;
+  justify-content: center;
+}
+
+.splash-chain__step--connector::before {
+  display: none;
+}
+
+.splash-chain__connector {
+  width: 100%;
+  text-align: center;
+  color: var(--color-text-faint);
+  font-size: 16px;
+}
+
+.splash-chain__capa {
+  margin-top: 4px;
+  padding: 14px 16px;
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.splash-chain__capa-label {
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-accent-hover);
+}
+
+.splash-chain__capa-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.splash-chain__capa-tag {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.splash-chain__capa-tag--corrective {
+  background: var(--color-wait-soft);
+  color: var(--color-wait);
+}
+
+.splash-chain__capa-tag--preventive {
+  background: var(--color-surface);
+  color: var(--color-accent-hover);
+  border: 1px solid var(--color-accent);
 }
 
 .splash-grid {
