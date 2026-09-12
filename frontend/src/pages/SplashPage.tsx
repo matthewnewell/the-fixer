@@ -13,7 +13,7 @@ const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caug
 const FEATURES = [
   {
     title: 'An objective voice',
-    body: 'The Fixer is an AI assistant with no stake in the outcome — it reads the whole chain and helps you catch solution bias early, following the evidence to the real cause.',
+    body: 'The Fixer is an AI assistant with no stake in the outcome — it works with you to identify the root cause and develop objective, pragmatic corrective and preventive action plans. No solution bias.',
   },
   {
     title: 'Actionable Reports',
