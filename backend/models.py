@@ -139,3 +139,54 @@ class Action(db.Model):
             "verified_at": self.verified_at.isoformat() if self.verified_at else None,
             "created_at": self.created_at.isoformat(),
         }
+
+
+class IncidentEvent(db.Model):
+    """The case's journal — an append-only log, same shape and purpose as Value Stream's
+    MapEvent. Two kinds of entry:
+      - "change": auto-captured when a why-step or action field worth tracking is edited (one
+        row per changed field), old/new value frozen as display strings at capture time.
+      - "note": a manual entry — the actual evidence a CAPA action was performed ("PO #4471
+        placed 8/20," "verified via re-inspection report INS-118") rather than just a status
+        flip. This is the point of the whole feature: "done" is a claim, a note is evidence.
+    Nothing here is ever updated or (for "change" rows) deleted. No auth, so `author` is a
+    free-text name the frontend remembers in localStorage."""
+
+    __tablename__ = "incident_event"
+
+    id = db.Column(db.String(36), primary_key=True, default=_uuid)
+    incident_id = db.Column(db.String(36), db.ForeignKey("incident.id"), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=_now, nullable=False, index=True)
+    author = db.Column(db.String(120), nullable=True)
+
+    # target_type "incident" (or null) is a case-level entry, not tied to one why-step/action.
+    # target_name is denormalized so a deleted step/action's history still reads sensibly.
+    target_type = db.Column(db.String(20), nullable=True)  # "why_step" | "action" | "incident"
+    target_id = db.Column(db.String(36), nullable=True, index=True)
+    target_name = db.Column(db.String(200), nullable=True)
+
+    kind = db.Column(db.String(20), nullable=False, default="note")  # "note" | "change"
+
+    # kind="change" only — the auto-captured diff, already formatted for display.
+    field = db.Column(db.String(60), nullable=True)
+    old_value = db.Column(db.Text, nullable=True)
+    new_value = db.Column(db.Text, nullable=True)
+
+    # kind="note" only.
+    note = db.Column(db.Text, nullable=True)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "incident_id": self.incident_id,
+            "created_at": self.created_at.isoformat(),
+            "author": self.author,
+            "target_type": self.target_type,
+            "target_id": self.target_id,
+            "target_name": self.target_name,
+            "kind": self.kind,
+            "field": self.field,
+            "old_value": self.old_value,
+            "new_value": self.new_value,
+            "note": self.note,
+        }

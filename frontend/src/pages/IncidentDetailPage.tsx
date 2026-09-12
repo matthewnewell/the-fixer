@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useHealth, useIncident, useUpdateIncident } from '../api/hooks'
-import type { IncidentStatus } from '../api/types'
+import type { EventTargetType, IncidentStatus } from '../api/types'
 import Nav from '../components/Nav'
 import WhyChain from '../components/WhyChain'
 import ActionsList from '../components/ActionsList'
+import Journal from '../components/Journal'
 import ChatPanel from '../components/ChatPanel'
 import './IncidentDetailPage.css'
 
-type Tab = 'root_cause' | 'capa'
+type Tab = 'root_cause' | 'capa' | 'journal'
 
 export default function IncidentDetailPage() {
   const { incidentId } = useParams<{ incidentId: string }>()
@@ -23,6 +24,10 @@ export default function IncidentDetailPage() {
   const [whyEditing, setWhyEditing] = useState(false)
 
   if (isLoading || !incident) return <div className="incident-detail__loading">Loading…</div>
+
+  function jumpToTarget(targetType: EventTargetType) {
+    setTab(targetType === 'action' ? 'capa' : 'root_cause')
+  }
 
   return (
     <div className="incident-layout">
@@ -73,15 +78,27 @@ export default function IncidentDetailPage() {
               >
                 Corrective &amp; Preventive Actions
               </button>
+              <button
+                className={`incident-tabs__tab${tab === 'journal' ? ' incident-tabs__tab--active' : ''}`}
+                onClick={() => setTab('journal')}
+              >
+                Journal
+              </button>
             </nav>
 
-            {tab === 'root_cause' ? (
+            {tab === 'root_cause' && (
               <section className="incident-detail__section" aria-label="Root cause">
                 <WhyChain incidentId={incident.id} steps={incident.why_steps ?? []} editing={whyEditing} />
               </section>
-            ) : (
+            )}
+            {tab === 'capa' && (
               <section className="incident-detail__section" aria-label="Corrective and preventive actions">
                 <ActionsList incidentId={incident.id} actions={incident.actions ?? []} />
+              </section>
+            )}
+            {tab === 'journal' && (
+              <section className="incident-detail__section" aria-label="Journal">
+                <Journal incidentId={incident.id} onTargetClick={jumpToTarget} />
               </section>
             )}
           </div>

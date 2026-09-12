@@ -1,15 +1,16 @@
 """
 Demo seed — two incidents, one fully worked (closed, root cause found, both a corrective and a
-preventive action), one still in progress (no root cause yet). Both projects match the demo
-projects Value Stream, Conway's Depot, and Dude-Where's-My-Part already share, and the first
-incident is the exact scenario the user described when %C&A/rework was designed into Value
-Stream: a design defect that escapes to Build and forces a re-buy of a long-lead casting.
+preventive action, both carrying a journal evidence note), one still in progress (no root cause
+yet). Both projects match the demo projects Value Stream, Conway's Depot, and
+Dude-Where's-My-Part already share, and the first incident is the exact scenario the user
+described when %C&A/rework was designed into Value Stream: a design defect that escapes to
+Build and forces a re-buy of a long-lead casting.
 """
 
 from datetime import timedelta
 
 from db import db
-from models import Action, Incident, WhyStep, _now
+from models import Action, Incident, IncidentEvent, WhyStep, _now
 
 DAY = timedelta(days=1)
 _BKT = "Demo: Bracket Assembly Program"
@@ -62,21 +63,39 @@ def seed_if_empty():
             created_by="Sam Ortiz (PM)", created_at=casting.created_at + i * DAY,
         ))
 
-    db.session.add_all([
-        Action(
-            incident_id=casting.id, kind="corrective",
-            description="Re-order the casting to the corrected hole pattern and expedite.",
-            owner="Subcontracts", status="done",
-            created_at=casting.created_at + 5 * DAY,
+    corrective = Action(
+        incident_id=casting.id, kind="corrective",
+        description="Re-order the casting to the corrected hole pattern and expedite.",
+        owner="Subcontracts", status="done",
+        created_at=casting.created_at + 5 * DAY,
+    )
+    preventive = Action(
+        incident_id=casting.id, kind="preventive",
+        description=(
+            "Add a long-lead-impact check to the design change review checklist — any "
+            "change after PDR must be checked against open long-lead POs before it's approved."
         ),
-        Action(
-            incident_id=casting.id, kind="preventive",
-            description=(
-                "Add a long-lead-impact check to the design change review checklist — any "
-                "change after PDR must be checked against open long-lead POs before it's approved."
-            ),
-            owner="Systems Engineering", status="open", due_date=(_now() + 14 * DAY).date(),
-            created_at=casting.created_at + 6 * DAY,
+        owner="Systems Engineering", status="open", due_date=(_now() + 14 * DAY).date(),
+        created_at=casting.created_at + 6 * DAY,
+    )
+    db.session.add_all([corrective, preventive])
+    db.session.flush()
+
+    # Journal: the evidence, not just the status flip - the actual point of the feature.
+    db.session.add_all([
+        IncidentEvent(
+            incident_id=casting.id, created_at=casting.created_at + 6 * DAY,
+            target_type="action", target_id=corrective.id,
+            target_name=f"Corrective: {corrective.description[:50]}",
+            author="Sam Ortiz (PM)", kind="note",
+            note="Re-order PO #4471 placed with the corrected hole pattern, expedited with Subcontracts — confirmed new ship date 3 weeks out.",
+        ),
+        IncidentEvent(
+            incident_id=casting.id, created_at=casting.created_at + 7 * DAY,
+            target_type="action", target_id=preventive.id,
+            target_name=f"Preventive: {preventive.description[:50]}",
+            author="Sam Ortiz (PM)", kind="note",
+            note="Drafted the checklist addition and sent to Systems Engineering for review before it goes into the design change procedure.",
         ),
     ])
 

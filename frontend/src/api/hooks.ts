@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { Action, ActionKind, ActionStatus, ChatMessage, ChatResponse, Incident, WhyStep } from './types'
+import type { Action, ActionKind, ActionStatus, ChatMessage, ChatResponse, EventTargetType, Incident, IncidentEvent, WhyStep } from './types'
 
 export function useIncidents(filters?: { project?: string; status?: string }) {
   const params = new URLSearchParams()
@@ -39,7 +39,12 @@ function useInvalidateIncident(incidentId?: string) {
   const qc = useQueryClient()
   return () => {
     qc.invalidateQueries({ queryKey: ['incidents'] })
-    if (incidentId) qc.invalidateQueries({ queryKey: ['incidents', 'detail', incidentId] })
+    if (incidentId) {
+      qc.invalidateQueries({ queryKey: ['incidents', 'detail', incidentId] })
+      // Prefix-matches every events query for this incident regardless of target_id — an
+      // edit's auto-captured journal entries show up on the next render without a separate call.
+      qc.invalidateQueries({ queryKey: ['incidents', incidentId, 'events'] })
+    }
   }
 }
 
@@ -76,8 +81,13 @@ export function useAddWhyStep(incidentId: string) {
 export function useUpdateWhyStep(incidentId: string) {
   const invalidate = useInvalidateIncident(incidentId)
   return useMutation({
-    mutationFn: ({ stepId, data }: { stepId: string; data: Partial<Pick<WhyStep, 'question' | 'answer' | 'is_root_cause'>> }) =>
-      api.put<WhyStep>(`/why-steps/${stepId}`, data),
+    mutationFn: ({
+      stepId,
+      data,
+    }: {
+      stepId: string
+      data: Partial<Pick<WhyStep, 'question' | 'answer' | 'is_root_cause'>> & { author?: string; journal_note?: string }
+    }) => api.put<WhyStep>(`/why-steps/${stepId}`, data),
     onSuccess: invalidate,
   })
 }
@@ -102,8 +112,45 @@ export function useCreateAction(incidentId: string) {
 export function useUpdateAction(incidentId: string) {
   const invalidate = useInvalidateIncident(incidentId)
   return useMutation({
-    mutationFn: ({ actionId, data }: { actionId: string; data: { status?: ActionStatus; verified_by?: string; owner?: string; due_date?: string } }) =>
-      api.put<Action>(`/actions/${actionId}`, data),
+    mutationFn: ({
+      actionId,
+      data,
+    }: {
+      actionId: string
+      data: { status?: ActionStatus; verified_by?: string; owner?: string; due_date?: string; author?: string; journal_note?: string }
+    }) => api.put<Action>(`/actions/${actionId}`, data),
+    onSuccess: invalidate,
+  })
+}
+
+// ── Journal ──────────────────────────────────────────────────────────────────────────────────
+
+/** The case's journal. Pass `targetId` to scope it to one why-step/action; omit for the
+ * whole-case feed. */
+export function useIncidentEvents(incidentId: string | undefined, targetId?: string) {
+  return useQuery({
+    queryKey: ['incidents', incidentId, 'events', targetId ?? 'all'],
+    queryFn: () =>
+      api.get<IncidentEvent[]>(
+        `/incidents/${incidentId}/events${targetId ? `?target_id=${encodeURIComponent(targetId)}` : ''}`,
+      ),
+    enabled: !!incidentId,
+  })
+}
+
+export function useAddIncidentEvent(incidentId: string) {
+  const invalidate = useInvalidateIncident(incidentId)
+  return useMutation({
+    mutationFn: (data: { note: string; author?: string; target_type?: EventTargetType; target_id?: string; target_name?: string }) =>
+      api.post<IncidentEvent>(`/incidents/${incidentId}/events`, data),
+    onSuccess: invalidate,
+  })
+}
+
+export function useDeleteIncidentEvent(incidentId: string) {
+  const invalidate = useInvalidateIncident(incidentId)
+  return useMutation({
+    mutationFn: (eventId: string) => api.del(`/events/${eventId}`),
     onSuccess: invalidate,
   })
 }

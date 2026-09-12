@@ -45,6 +45,28 @@ export interface Action {
   created_at: string
 }
 
+export type EventTargetType = 'why_step' | 'action' | 'incident'
+export type EventKind = 'note' | 'change'
+
+/** One journal entry — an auto-captured field diff or a manual note. Same shape as Value
+ * Stream's MapEvent: append-only, "change" rows are permanent, only "note" rows can be
+ * deleted. The manual notes are the actual point of this feature — evidence a CAPA action was
+ * performed, not just a status flip. */
+export interface IncidentEvent {
+  id: string
+  incident_id: string
+  created_at: string
+  author: string | null
+  target_type: EventTargetType | null
+  target_id: string | null
+  target_name: string | null
+  kind: EventKind
+  field: string | null
+  old_value: string | null
+  new_value: string | null
+  note: string | null
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
