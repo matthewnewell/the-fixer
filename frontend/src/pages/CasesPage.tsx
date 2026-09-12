@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useCreateIncident, useIncidents, useProjects } from '../api/hooks'
 import type { IncidentStatus } from '../api/types'
 import './CasesPage.css'
@@ -19,6 +19,17 @@ export default function CasesPage() {
   const createIncident = useCreateIncident()
   const [composing, setComposing] = useState(false)
   const [title, setTitle] = useState('')
+
+  // The Nav's "+ New case" button is reachable from anywhere and lands here with ?new=1 —
+  // jump straight into the composer instead of making people click again once they arrive.
+  const [searchParams, setSearchParams] = useSearchParams()
+  useEffect(() => {
+    if (searchParams.get('new')) {
+      setComposing(true)
+      setSearchParams((prev) => { const next = new URLSearchParams(prev); next.delete('new'); return next }, { replace: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const sorted = useMemo(() => {
     if (!incidents) return []

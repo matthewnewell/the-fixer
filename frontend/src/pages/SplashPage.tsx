@@ -35,10 +35,8 @@ export default function SplashPage() {
               AI-guided root cause analysis and CAPA plans.
             </p>
             <div className="splash-hero__actions">
-              <Link className="splash-btn splash-btn--primary" to="/">View cases</Link>
-              <Link className="splash-btn splash-btn--ghost" to={`/incidents/${DEMO_CASE_ID}`}>
-                Walk through a real case
-              </Link>
+              <Link className="splash-btn splash-btn--ghost" to={`/incidents/${DEMO_CASE_ID}`}>Demo</Link>
+              <Link className="splash-btn splash-btn--primary" to="/">Cases</Link>
             </div>
           </header>
 

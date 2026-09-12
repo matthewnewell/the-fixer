@@ -39,3 +39,9 @@
   background: var(--color-accent-soft);
   color: var(--color-accent);
 }
+
+.fx-nav__new {
+  margin-left: auto;
+  padding: 6px 12px;
+  font-size: 13px;
+}

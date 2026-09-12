@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import './Nav.css'
 
 export default function Nav() {
@@ -16,6 +16,9 @@ export default function Nav() {
           Cases
         </NavLink>
       </div>
+      {/* Reachable from anywhere (splash, cases, an existing case) rather than only from the
+          Cases page — opens straight into that page's own composer via ?new=1. */}
+      <Link className="fx-btn fx-btn--primary fx-nav__new" to="/?new=1">+ New case</Link>
     </nav>
   )
 }
