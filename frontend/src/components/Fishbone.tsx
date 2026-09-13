@@ -12,13 +12,15 @@ const BOTTOM_CATEGORIES = FISHBONE_CATEGORIES.slice(3)
 
 // Horizontal center of each of the row's 3 equal columns, as a % of the row's width — where
 // each bone's *tile-side* end lands, so a bone genuinely anchors under/over its category's
-// middle rather than one of its edges. Shifted left by the bone's own horizontal reach (see
-// Fishbone.css — 30px at 40° projects ~23px horizontally) since each bone is positioned by its
-// spine-side (pivot) end and rotates outward from there to land on that center point.
-// Independent of how tall any category's card ends up (a category with one short cause and one
-// with a long paragraph still get identically angled bones), because the bones live in their
-// own fixed-height band between the rows rather than being attached to each card's own edge.
-const BONE_POSITIONS = ['calc(16.6667% - 23px)', 'calc(50% - 23px)', 'calc(83.3333% - 23px)']
+// middle rather than one of its edges. Shifted right of that center by the bone's own
+// horizontal reach (see Fishbone.css — 30px at 40° projects ~23px horizontally), since each
+// bone is positioned by its spine-side (pivot) end, which sits further toward the head than
+// its tile-side end — the same direction every bone leans, so all of them point toward the
+// spine's head rather than away from it. Independent of how tall any category's card ends up
+// (a category with one short cause and one with a long paragraph still get identically angled
+// bones), because the bones live in their own fixed-height band between the rows rather than
+// being attached to each card's own edge.
+const BONE_POSITIONS = ['calc(16.6667% + 23px)', 'calc(50% + 23px)', 'calc(83.3333% + 23px)']
 
 /** The predecessor step to the Why chain — a brainstorm across the six fixed categories, not a
  * canvas and not a competing analysis mode. Its only job is generating candidate causes worth

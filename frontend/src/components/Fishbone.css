@@ -62,7 +62,7 @@
 .fishbone__spine-line {
   position: absolute;
   left: 0;
-  right: 8px;
+  right: 6px;
   top: 50%;
   height: 2px;
   background: var(--color-border-strong);
@@ -73,20 +73,21 @@
 .fishbone__spine-head {
   position: absolute;
   top: 50%;
-  right: 0;
-  width: 8px;
-  height: 8px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--color-accent);
   transform: translateY(-50%);
 }
 
-/* One bone: a fixed 30px stem whose left end (the pivot) sits on the spine's centerline — the
-   position it's placed at (BONE_POSITIONS) is pre-shifted left by the stem's own horizontal
-   reach at 40° (30·cos40°≈23px), so that after rotating, the *other* end lands exactly on each
-   category's horizontal center rather than 23px off to the side of it. Top-row bones rotate up
-   (-40°), bottom-row rotate down (40°) — opposite vertical directions, same rightward lean, so
-   every bone sweeps toward the spine's pinhead the way real fishbone ribs do. */
+/* One bone: a fixed 30px stem whose left end (the pivot, on the spine's centerline) is placed
+   23px to the right of the category's actual center (BONE_POSITIONS) — the stem's own
+   horizontal reach at its rotation angle — so that after rotating, the *other* end swings back
+   left to land exactly on that center point. Net effect: the spine-side end of every bone sits
+   further toward the head than its tile-side end, so the ribs all point toward the head,
+   instead of away from it. Top-row bones rotate to -140°, bottom-row to 140° — mirror images
+   of a 40°-from-horizontal rib, opposite vertical directions, same head-ward lean. */
 .fishbone__bone {
   position: absolute;
   top: 50%;
@@ -98,11 +99,11 @@
 }
 
 .fishbone__bone--top {
-  transform: translateY(-50%) rotate(-40deg);
+  transform: translateY(-50%) rotate(-140deg);
 }
 
 .fishbone__bone--bottom {
-  transform: translateY(-50%) rotate(40deg);
+  transform: translateY(-50%) rotate(140deg);
 }
 
 .fishbone__bone--picked {
