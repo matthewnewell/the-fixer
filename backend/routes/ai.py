@@ -16,10 +16,18 @@ from models import Incident
 bp = Blueprint("ai", __name__, url_prefix="/api")
 
 SYSTEM_PROMPT = """You are the assistant embedded in The Fixer, a root-cause-analysis and CAPA
-(Corrective and Preventive Action) tool. An operator is working a 5-Whys chain against an
-incident, then defining actions.
+(Corrective and Preventive Action) tool. An operator works an incident through three stages:
+fishbone brainstorm (optional, only before the Why chain has started) -> a 5-Whys chain -> CAPA
+actions.
 
 Your job:
+- If the Why chain is still empty, help with the fishbone brainstorm first: prompt across the
+  six categories (Man, Machine, Method, Material, Measurement, Environment) and push back on a
+  shallow one-word cause the same way you'd push back on a restated symptom — "training" isn't a
+  candidate cause, "the backup inspectors' cert training wasn't scheduled this quarter" is. Not
+  every category needs an entry; a category with nothing plausible is a real finding, not a gap
+  to fill for its own sake. Once a couple of candidates look real, help pick the most promising
+  one to promote — that's what starts the Why chain.
 - Help ask the next "why" — a good next why digs into a *cause*, not a restated symptom. If the
   most recent answer just rephrases the problem ("it failed because it broke") rather than
   explaining a mechanism, say so plainly and suggest a sharper question.
@@ -33,6 +41,11 @@ Your job:
 Never invent facts about the incident that aren't in the context below. If the chain is empty
 or thin, say so and help build it rather than guessing at what happened."""
 
+_CATEGORY_LABEL = {
+    "man": "Man", "machine": "Machine", "method": "Method",
+    "material": "Material", "measurement": "Measurement", "environment": "Environment",
+}
+
 
 def _build_context(incident: Incident) -> str:
     lines = [f'Incident: "{incident.title}" (status: {incident.status})']
@@ -40,6 +53,14 @@ def _build_context(incident: Incident) -> str:
         lines.append(f"Project: {incident.project}")
     if incident.description:
         lines.append(f"Description: {incident.description}")
+
+    lines.append("\nFishbone brainstorm so far:")
+    if incident.fishbone_causes:
+        for c in incident.fishbone_causes:
+            promoted = "  <- promoted, started the Why chain" if c.promoted_why_step_id else ""
+            lines.append(f"  [{_CATEGORY_LABEL.get(c.category, c.category)}] {c.description}{promoted}")
+    else:
+        lines.append("  (none yet)")
 
     lines.append("\n5 Whys chain so far:")
     if incident.why_steps:

@@ -83,14 +83,61 @@
   color: inherit;
 }
 
-/* ── Vertical 5-Whys on the left, CAPA on the right, a deliberate connector between them —
-   the whole story in one glance, no scrolling, each half sharing the box evenly. Wraps to a
-   stack on narrow viewports. ── */
+/* ── Fishbone brainstorm, then 5-Whys, then CAPA — the whole story in one glance, no
+   scrolling. Fishbone is a compact schematic (it only has to name the method), the Whys and
+   CAPA panels share the remaining width evenly. Wraps to a stack on narrow viewports. ── */
 .splash-layout {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(160px, 0.7fr) auto 1fr auto 1fr;
   align-items: stretch;
   gap: 4px;
+}
+
+.splash-fishbone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 20px;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.splash-fishbone__label {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-faint);
+}
+
+.splash-fishbone__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.splash-fishbone__chip {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+.splash-fishbone__chip--picked {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  border-color: var(--color-success);
+}
+
+.splash-fishbone__note {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
 }
 
 .splash-chain {
@@ -262,7 +309,7 @@
   color: var(--color-text-secondary);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 860px) {
   .splash-layout {
     display: flex;
     flex-direction: column;

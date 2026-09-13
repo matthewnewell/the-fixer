@@ -13,7 +13,7 @@ os.environ["DATA_DIR"] = tempfile.mkdtemp(prefix="thefixer-test-")
 
 from app import create_app  # noqa: E402
 from db import db  # noqa: E402
-from models import Action, Incident, WhyStep  # noqa: E402
+from models import Action, FishboneCause, Incident, WhyStep  # noqa: E402
 
 
 def test_has_root_cause_and_action_counts():
@@ -33,3 +33,17 @@ def test_has_root_cause_and_action_counts():
         assert d["has_root_cause"] is True
         assert d["action_count"] == 2
         assert d["open_action_count"] == 1  # "done" isn't "verified" yet
+
+
+def test_fishbone_count():
+    app = create_app()
+    with app.app_context():
+        incident = Incident(title="Test incident")
+        db.session.add(incident)
+        db.session.flush()
+        db.session.add(FishboneCause(incident_id=incident.id, category="machine", description="Worn fixture"))
+        db.session.add(FishboneCause(incident_id=incident.id, category="method", description="No incoming check"))
+        db.session.commit()
+
+        d = incident.to_dict()
+        assert d["fishbone_count"] == 2

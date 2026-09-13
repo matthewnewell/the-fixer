@@ -1,13 +1,21 @@
 """
-Models: Incident, WhyStep, Action.
+Models: Incident, FishboneCause, WhyStep, Action.
 
 An Incident is what failed. A WhyStep is one link in a 5-Whys chain worked against it — a
 linear sequence (why 1 -> why 2 -> ... -> root cause), the same shape as a Value Stream node
 chain: each step points at the one before it, and the chain terminates when someone marks a
-step the actual root cause rather than just another symptom one level down. Fishbone (the
-categorical Man/Machine/Method/Material/Measurement/Environment view) is deliberately not
-built yet — 5 Whys covers the common case and reuses a much simpler linear-chain data shape;
-fishbone is a real second canvas type, not a variant of this one.
+step the actual root cause rather than just another symptom one level down.
+
+A FishboneCause is a candidate cause proposed during an up-front brainstorm across the classic
+Ishikawa categories (Man, Machine, Method, Material, Measurement, Environment) — the divergent
+step that decides where to start, not a competing analysis mode. It is deliberately NOT a
+canvas: no positions, no branching structure to draw, just a categorized list. Fishbone's real
+failure mode in practice is shallow one-word answers per category with nobody ever asking "why"
+under any of them — so its only real job here is generating candidates worth promoting, and
+promoting one is exactly what starts the linear WhyStep chain above (its `answer` seeded from
+the cause's description). Because this app's chain is a single straight line, not a tree,
+promoting is only allowed while that chain is still empty — see routes/incidents.py. A cause
+that never gets promoted stays on the record as "considered and set aside," not deleted.
 
 An Action is a Corrective or Preventive Action (CAPA) against the incident — fixing what broke
 this time (corrective) vs. changing something so it can't happen again (preventive). Both live
@@ -26,6 +34,10 @@ def _now():
 INCIDENT_STATUSES = ("open", "investigating", "closed")
 ACTION_KINDS = ("corrective", "preventive")
 ACTION_STATUSES = ("open", "in_progress", "done", "verified")
+# The classic Ishikawa 6M's, minus Mother Nature (folded into Environment) — fixed, not
+# user-defined, the same way ACTION_KINDS is fixed. Order matters: this is the order every
+# fishbone view renders them in.
+FISHBONE_CATEGORIES = ("man", "machine", "method", "material", "measurement", "environment")
 
 
 class Incident(db.Model):
@@ -45,6 +57,10 @@ class Incident(db.Model):
     created_at = db.Column(db.DateTime, default=_now, nullable=False)
     closed_at = db.Column(db.DateTime, nullable=True)
 
+    fishbone_causes = db.relationship(
+        "FishboneCause", backref="incident", cascade="all, delete-orphan", lazy="selectin",
+        order_by="FishboneCause.created_at",
+    )
     why_steps = db.relationship(
         "WhyStep", backref="incident", cascade="all, delete-orphan", lazy="selectin",
         order_by="WhyStep.sequence",
@@ -65,21 +81,51 @@ class Incident(db.Model):
             "status": self.status,
             "created_at": self.created_at.isoformat(),
             "closed_at": self.closed_at.isoformat() if self.closed_at else None,
+            "fishbone_count": len(self.fishbone_causes),
             "why_count": len(self.why_steps),
             "action_count": len(self.actions),
             "has_root_cause": any(w.is_root_cause for w in self.why_steps),
             "open_action_count": sum(1 for a in self.actions if a.status != "verified"),
         }
         if include_children:
+            d["fishbone_causes"] = [f.to_dict() for f in self.fishbone_causes]
             d["why_steps"] = [w.to_dict() for w in self.why_steps]
             d["actions"] = [a.to_dict() for a in self.actions]
         return d
 
 
+class FishboneCause(db.Model):
+    """One candidate cause proposed under one of the six fixed categories — see the module
+    docstring. `promoted_why_step_id` is set once this cause is picked to start the Why chain;
+    the cause itself is never deleted by promotion, it just carries the link to what it became."""
+
+    __tablename__ = "fishbone_cause"
+
+    id = db.Column(db.String(36), primary_key=True, default=_uuid)
+    incident_id = db.Column(db.String(36), db.ForeignKey("incident.id"), nullable=False, index=True)
+    category = db.Column(db.String(20), nullable=False)  # see FISHBONE_CATEGORIES
+    description = db.Column(db.Text, nullable=False)
+    created_by = db.Column(db.String(120), nullable=True)
+    created_at = db.Column(db.DateTime, default=_now, nullable=False)
+    promoted_why_step_id = db.Column(db.String(36), db.ForeignKey("why_step.id"), nullable=True)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "incident_id": self.incident_id,
+            "category": self.category,
+            "description": self.description,
+            "created_by": self.created_by,
+            "created_at": self.created_at.isoformat(),
+            "promoted_why_step_id": self.promoted_why_step_id,
+        }
+
+
 class WhyStep(db.Model):
     """One link in the 5-Whys chain. `sequence` is 1-indexed and strictly ordered — the chain
-    is a straight line, not a tree, on purpose (fishbone is the tool for "more than one cause
-    at this level"; this one is for "keep asking why until you hit something you can act on")."""
+    is a straight line, not a tree, on purpose (FishboneCause is the tool for "more than one
+    candidate cause before you've picked a thread"; this one is for "keep asking why, down one
+    thread, until you hit something you can act on")."""
 
     __tablename__ = "why_step"
 

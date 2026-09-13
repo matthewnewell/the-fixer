@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { Action, ActionKind, ActionStatus, ChatMessage, ChatResponse, EventTargetType, Incident, IncidentEvent, WhyStep } from './types'
+import type { Action, ActionKind, ActionStatus, ChatMessage, ChatResponse, EventTargetType, FishboneCategory, FishboneCause, Incident, IncidentEvent, WhyStep } from './types'
 
 export function useIncidents(filters?: { project?: string; status?: string }) {
   const params = new URLSearchParams()
@@ -65,6 +65,33 @@ export function useUpdateIncident(incidentId: string) {
   return useMutation({
     mutationFn: (data: Partial<Pick<Incident, 'title' | 'description' | 'project' | 'portfolio' | 'reported_by' | 'status'>>) =>
       api.put<Incident>(`/incidents/${incidentId}`, data),
+    onSuccess: invalidate,
+  })
+}
+
+// ── Fishbone (predecessor to the Why chain) ─────────────────────────────────────────────────
+
+export function useAddFishboneCause(incidentId: string) {
+  const invalidate = useInvalidateIncident(incidentId)
+  return useMutation({
+    mutationFn: (data: { category: FishboneCategory; description: string; created_by?: string }) =>
+      api.post<FishboneCause>(`/incidents/${incidentId}/fishbone-causes`, data),
+    onSuccess: invalidate,
+  })
+}
+
+export function useDeleteFishboneCause(incidentId: string) {
+  const invalidate = useInvalidateIncident(incidentId)
+  return useMutation({
+    mutationFn: (causeId: string) => api.del(`/fishbone-causes/${causeId}`),
+    onSuccess: invalidate,
+  })
+}
+
+export function usePromoteFishboneCause(incidentId: string) {
+  const invalidate = useInvalidateIncident(incidentId)
+  return useMutation({
+    mutationFn: (causeId: string) => api.post<{ cause: FishboneCause; why_step: WhyStep }>(`/fishbone-causes/${causeId}/promote`),
     onSuccess: invalidate,
   })
 }

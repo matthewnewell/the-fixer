@@ -10,10 +10,12 @@ const DEMO_CASE_ID = 'demo-casting-rework'
 
 const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caught?', 'Why is there no check?']
 
+const FISHBONE_CATEGORIES = ['Man', 'Machine', 'Method', 'Material', 'Measurement', 'Environment']
+
 const FEATURES = [
   {
     title: 'An objective voice',
-    body: 'The Fixer is an AI assistant with no stake in the outcome — it works with you to identify the root cause and develop objective, pragmatic corrective and preventive action plans. No solution bias.',
+    body: 'The Fixer is an AI assistant with no stake in the outcome — it helps you brainstorm candidate causes, then guides the 5 Whys to a root cause and an objective, pragmatic corrective and preventive action plan. No solution bias.',
   },
   {
     title: 'Actionable Reports',
@@ -43,11 +45,11 @@ export default function SplashPage() {
           <header className="splash-hero">
             <h1 className="splash-hero__title">The Fixer</h1>
             <p className="splash-hero__sub">
-              AI-guided root cause analysis and CAPA plans.
+              AI-guided root cause analysis — from fishbone brainstorm to CAPA plan.
               <button
                 className="splash-info-btn"
                 onClick={() => setInfoOpen(true)}
-                aria-label="What is root cause analysis and CAPA?"
+                aria-label="What is fishbone, root cause analysis, and CAPA?"
               >
                 ?
               </button>
@@ -57,6 +59,24 @@ export default function SplashPage() {
           <figure className="splash-figure">
             <Link className="splash-figure__link" to={`/incidents/${DEMO_CASE_ID}`}>
               <div className="splash-layout">
+                <div className="splash-fishbone">
+                  <div className="splash-fishbone__label">Fishbone</div>
+                  <div className="splash-fishbone__grid">
+                    {FISHBONE_CATEGORIES.map((cat) => (
+                      <span
+                        key={cat}
+                        className={`splash-fishbone__chip${cat === 'Man' ? ' splash-fishbone__chip--picked' : ''}`}
+                      >
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="splash-fishbone__note">Brainstorm candidate causes, then promote one to start the chain.</div>
+                </div>
+                <div className="splash-connector">
+                  <div className="splash-connector__line" />
+                  <div className="splash-connector__head">▶</div>
+                </div>
                 <div className="splash-chain">
                   <div className="splash-chain__label">5 Whys</div>
                   {CHAIN.map((q, i) => (
@@ -110,12 +130,19 @@ export default function SplashPage() {
         <div className="splash-modal-backdrop" onClick={() => setInfoOpen(false)}>
           <div className="splash-modal" onClick={(e) => e.stopPropagation()}>
             <button className="splash-modal__close" onClick={() => setInfoOpen(false)} aria-label="Close">✕</button>
-            <h2 className="splash-modal__title">Root Cause Analysis &amp; CAPA</h2>
+            <h2 className="splash-modal__title">Fishbone, Root Cause &amp; CAPA</h2>
+            <p className="splash-modal__body">
+              <strong>Fishbone brainstorm</strong> comes first when more than one thing could be
+              the cause: candidates get sorted into six categories — man, machine, method,
+              material, measurement, environment — before you commit to chasing one down.
+            </p>
             <p className="splash-modal__body">
               <strong>Root cause analysis (5 Whys)</strong> means asking "why" repeatedly, one
-              answer at a time, until you reach something you can actually change — not the
-              first plausible explanation, and not "human error," which is almost always a
-              symptom of a process gap rather than a cause you can fix.
+              answer at a time, until you reach something you can actually change — starting
+              from the cause you promoted out of the brainstorm, or straight from the problem
+              when the cause is already obvious. Not the first plausible explanation, and not
+              "human error," which is almost always a symptom of a process gap rather than a
+              cause you can fix.
             </p>
             <p className="splash-modal__body">
               <strong>CAPA (Corrective &amp; Preventive Action)</strong> is what you do about it,

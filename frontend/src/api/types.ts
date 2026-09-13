@@ -10,12 +10,41 @@ export interface Incident {
   status: IncidentStatus
   created_at: string
   closed_at: string | null
+  fishbone_count: number
   why_count: number
   action_count: number
   has_root_cause: boolean
   open_action_count: number
+  fishbone_causes?: FishboneCause[]
   why_steps?: WhyStep[]
   actions?: Action[]
+}
+
+/** The classic Ishikawa 6M's, minus Mother Nature (folded into Environment) — fixed, in render
+ * order. Kept in sync with backend/models.py's FISHBONE_CATEGORIES by hand (small, stable set). */
+export const FISHBONE_CATEGORIES = ['man', 'machine', 'method', 'material', 'measurement', 'environment'] as const
+export type FishboneCategory = (typeof FISHBONE_CATEGORIES)[number]
+
+export const FISHBONE_CATEGORY_LABEL: Record<FishboneCategory, string> = {
+  man: 'Man',
+  machine: 'Machine',
+  method: 'Method',
+  material: 'Material',
+  measurement: 'Measurement',
+  environment: 'Environment',
+}
+
+/** A candidate cause from the fishbone brainstorm — the predecessor step to the Why chain, not
+ * a competing analysis mode. `promoted_why_step_id` is set once it's the one that started the
+ * chain; promoting is only possible while that chain is still empty (see backend/models.py). */
+export interface FishboneCause {
+  id: string
+  incident_id: string
+  category: FishboneCategory
+  description: string
+  created_by: string | null
+  created_at: string
+  promoted_why_step_id: string | null
 }
 
 export interface WhyStep {

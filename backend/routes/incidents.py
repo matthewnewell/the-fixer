@@ -5,8 +5,10 @@ from db import db
 from models import (
     ACTION_KINDS,
     ACTION_STATUSES,
+    FISHBONE_CATEGORIES,
     INCIDENT_STATUSES,
     Action,
+    FishboneCause,
     Incident,
     IncidentEvent,
     WhyStep,
@@ -83,6 +85,68 @@ def delete_incident(incident_id):
     db.session.delete(incident)
     db.session.commit()
     return "", 204
+
+
+# ── Fishbone (predecessor to the Why chain — see models.py) ───────────────────────────────────
+
+@bp.post("/incidents/<incident_id>/fishbone-causes")
+def add_fishbone_cause(incident_id):
+    Incident.query.get_or_404(incident_id)
+    body = request.get_json(force=True) or {}
+
+    category = body.get("category")
+    if category not in FISHBONE_CATEGORIES:
+        return jsonify({"error": f"category must be one of {FISHBONE_CATEGORIES}"}), 400
+    description = (body.get("description") or "").strip()
+    if not description:
+        return jsonify({"error": "description is required"}), 400
+
+    cause = FishboneCause(
+        incident_id=incident_id,
+        category=category,
+        description=description,
+        created_by=(body.get("created_by") or "").strip() or None,
+    )
+    db.session.add(cause)
+    db.session.commit()
+    return jsonify(cause.to_dict()), 201
+
+
+@bp.delete("/fishbone-causes/<cause_id>")
+def delete_fishbone_cause(cause_id):
+    cause = FishboneCause.query.get_or_404(cause_id)
+    if cause.promoted_why_step_id:
+        return jsonify({"error": "this cause already started the Why chain — delete it there instead"}), 400
+    db.session.delete(cause)
+    db.session.commit()
+    return "", 204
+
+
+@bp.post("/fishbone-causes/<cause_id>/promote")
+def promote_fishbone_cause(cause_id):
+    """Starts the Why chain from this candidate cause — sequence 1, seeded with the cause's own
+    description as the answer. Only allowed while the chain is still empty: this app's chain is
+    one straight line, not a tree, so promoting a second cause once the first why is already
+    being asked would have nowhere real to go. See models.py's module docstring."""
+    cause = FishboneCause.query.get_or_404(cause_id)
+    if cause.promoted_why_step_id:
+        return jsonify({"error": "this cause has already been promoted"}), 400
+    incident = cause.incident
+    if incident.why_steps:
+        return jsonify({"error": "the Why chain already has steps — fishbone only starts a fresh chain"}), 400
+
+    step = WhyStep(
+        incident_id=incident.id,
+        sequence=1,
+        question="Why does this look like the cause?",
+        answer=cause.description,
+        created_by=cause.created_by,
+    )
+    db.session.add(step)
+    db.session.flush()
+    cause.promoted_why_step_id = step.id
+    db.session.commit()
+    return jsonify({"cause": cause.to_dict(), "why_step": step.to_dict()}), 201
 
 
 # ── 5 Whys ───────────────────────────────────────────────────────────────────────────────────

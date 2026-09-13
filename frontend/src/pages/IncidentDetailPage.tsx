@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useHealth, useIncident, useUpdateIncident } from '../api/hooks'
 import type { EventTargetType, IncidentStatus } from '../api/types'
 import Nav from '../components/Nav'
+import Fishbone from '../components/Fishbone'
 import WhyChain from '../components/WhyChain'
 import ActionsList from '../components/ActionsList'
 import Journal from '../components/Journal'
@@ -88,6 +89,12 @@ export default function IncidentDetailPage() {
 
             {tab === 'root_cause' && (
               <section className="incident-detail__section" aria-label="Root cause">
+                <Fishbone
+                  incidentId={incident.id}
+                  causes={incident.fishbone_causes ?? []}
+                  chainStarted={(incident.why_steps ?? []).length > 0}
+                  editing={whyEditing}
+                />
                 <WhyChain incidentId={incident.id} steps={incident.why_steps ?? []} editing={whyEditing} />
               </section>
             )}

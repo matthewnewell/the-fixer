@@ -5,12 +5,16 @@ yet). Both projects match the demo projects Value Stream, Conway's Depot, and
 Dude-Where's-My-Part already share, and the first incident is the exact scenario the user
 described when %C&A/rework was designed into Value Stream: a design defect that escapes to
 Build and forces a re-buy of a long-lead casting.
+
+The in-progress incident's Why chain is backed by a fishbone brainstorm — three candidate
+causes considered (Man/Machine/Method), one promoted, so a fresh case shows the whole predecessor
+step already worked through, not just its aftermath.
 """
 
 from datetime import timedelta
 
 from db import db
-from models import Action, Incident, IncidentEvent, WhyStep, _now
+from models import Action, FishboneCause, Incident, IncidentEvent, WhyStep, _now
 
 DAY = timedelta(days=1)
 _BKT = "Demo: Bracket Assembly Program"
@@ -112,16 +116,40 @@ def seed_if_empty():
     db.session.add(ndt)
     db.session.flush()
 
+    # Fishbone brainstorm — done before the Why chain, per the module docstring: three
+    # candidates considered, one promoted (its description became the first why's answer).
+    ndt_fishbone = [
+        ("man", "Only one certified NDT inspector for this panel type on this shift.", True),
+        ("machine", "NDT booth is only calibrated for one panel geometry, so it can't flex to cover the gap.", False),
+        ("method", "No cross-training plan gets a backup inspector certified before the current one is out.", False),
+    ]
+    promoted_description = None
+    for category, description, promoted in ndt_fishbone:
+        cause = FishboneCause(
+            incident_id=ndt.id, category=category, description=description,
+            created_by="Dana Kim (PM)", created_at=ndt.created_at + timedelta(hours=1),
+        )
+        db.session.add(cause)
+        db.session.flush()
+        if promoted:
+            promoted_cause = cause
+            promoted_description = description
+
     ndt_whys = [
-        ("Why are panels sitting in an NDT hold?",
-         "There's only one certified NDT inspector for this panel type on this shift.", False),
+        ("Why are panels sitting in an NDT hold?", promoted_description, False),
         ("Why is there only one certified inspector?",
          "Certification training wasn't scheduled for backup inspectors this quarter.", False),
     ]
+    first_step = None
     for i, (q, a, root) in enumerate(ndt_whys, start=1):
-        db.session.add(WhyStep(
+        step = WhyStep(
             incident_id=ndt.id, sequence=i, question=q, answer=a, is_root_cause=root,
             created_by="Dana Kim (PM)", created_at=ndt.created_at + i * timedelta(hours=6),
-        ))
+        )
+        db.session.add(step)
+        db.session.flush()
+        if i == 1:
+            first_step = step
+    promoted_cause.promoted_why_step_id = first_step.id
 
     db.session.commit()
