@@ -34,12 +34,15 @@
   color: var(--color-text-faint);
 }
 
-/* An actual Ishikawa skeleton — three categories above a horizontal spine, three below, each
-   connected to it by a short diagonal bone (a small fixed-size SVG, so it stays a real line
-   regardless of how much a category holds). Both rows' bones lean the same direction (toward
-   the spine's arrowhead on the right) so they read as sweeping back toward one head, the way
-   real fishbone ribs do. Collapses to a plain stacked list — no spine, no bones — below
-   640px, where the diagonal geometry stops being legible at that width anyway. */
+/* An actual Ishikawa skeleton — three categories above a horizontal spine, three below. The
+   bones live in their own fixed-height band between the two rows rather than being attached to
+   each card's own bottom/top edge — a card with one short cause and a card with a long
+   paragraph still produce identically angled bones, because the bone's geometry never depends
+   on card height. Each bone is centered under/over its card (see BONE_POSITIONS in the .tsx)
+   and meets the spine at a fixed 40°, both rows leaning the same direction (toward the spine's
+   pinhead on the right) so they read as sweeping back toward one head. Collapses to a plain
+   stacked list — no spine, no bones — below 640px, where this geometry stops being legible at
+   that width anyway. */
 .fishbone__diagram {
   display: flex;
   flex-direction: column;
@@ -51,18 +54,26 @@
   gap: 20px;
 }
 
-.fishbone__spine {
+.fishbone__spine-band {
   position: relative;
+  height: 44px;
+}
+
+.fishbone__spine-line {
+  position: absolute;
+  left: 0;
+  right: 8px;
+  top: 50%;
   height: 2px;
   background: var(--color-border-strong);
+  transform: translateY(-50%);
 }
 
 /* A small pinhead, same convention as the splash figure's fishbone diagram — not an arrowhead. */
-.fishbone__spine::after {
-  content: '';
+.fishbone__spine-head {
   position: absolute;
   top: 50%;
-  right: -3px;
+  right: 0;
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -70,33 +81,40 @@
   transform: translateY(-50%);
 }
 
+/* One bone: a fixed 30px stem whose left end (the pivot) sits on the spine's centerline — the
+   position it's placed at (BONE_POSITIONS) is pre-shifted left by the stem's own horizontal
+   reach at 40° (30·cos40°≈23px), so that after rotating, the *other* end lands exactly on each
+   category's horizontal center rather than 23px off to the side of it. Top-row bones rotate up
+   (-40°), bottom-row rotate down (40°) — opposite vertical directions, same rightward lean, so
+   every bone sweeps toward the spine's pinhead the way real fishbone ribs do. */
+.fishbone__bone {
+  position: absolute;
+  top: 50%;
+  width: 30px;
+  height: 2px;
+  background: var(--color-border-strong);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.fishbone__bone--top {
+  transform: translateY(-50%) rotate(-40deg);
+}
+
+.fishbone__bone--bottom {
+  transform: translateY(-50%) rotate(40deg);
+}
+
+.fishbone__bone--picked {
+  background: var(--color-success);
+  height: 2.5px;
+}
+
 .fishbone__category {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-}
-
-.fishbone__bone {
-  display: block;
-  width: 100%;
-  height: 20px;
-}
-
-.fishbone__bone line {
-  stroke: var(--color-border-strong);
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
-.fishbone__bone--picked line {
-  stroke: var(--color-success);
-  stroke-width: 2.5;
-}
-
-.fishbone__category-body {
-  display: flex;
-  flex-direction: column;
   gap: 6px;
+  min-width: 0;
   padding: 10px 12px;
   background: var(--color-surface-sunken);
   border: 1px solid var(--color-border);
@@ -118,8 +136,7 @@
     gap: 10px;
   }
 
-  .fishbone__spine,
-  .fishbone__bone {
+  .fishbone__spine-band {
     display: none;
   }
 }

@@ -10,17 +10,26 @@ import './Fishbone.css'
 const TOP_CATEGORIES = FISHBONE_CATEGORIES.slice(0, 3)
 const BOTTOM_CATEGORIES = FISHBONE_CATEGORIES.slice(3)
 
+// Horizontal center of each of the row's 3 equal columns, as a % of the row's width — where
+// each bone's *tile-side* end lands, so a bone genuinely anchors under/over its category's
+// middle rather than one of its edges. Shifted left by the bone's own horizontal reach (see
+// Fishbone.css — 30px at 40° projects ~23px horizontally) since each bone is positioned by its
+// spine-side (pivot) end and rotates outward from there to land on that center point.
+// Independent of how tall any category's card ends up (a category with one short cause and one
+// with a long paragraph still get identically angled bones), because the bones live in their
+// own fixed-height band between the rows rather than being attached to each card's own edge.
+const BONE_POSITIONS = ['calc(16.6667% - 23px)', 'calc(50% - 23px)', 'calc(83.3333% - 23px)']
+
 /** The predecessor step to the Why chain — a brainstorm across the six fixed categories, not a
  * canvas and not a competing analysis mode. Its only job is generating candidate causes worth
  * promoting; promoting one is what actually starts the linear WhyChain below it. Only shows
  * once the chain has started if there's fishbone history to show — a case that always went
  * straight to the Why chain never grows this section.
  *
- * Drawn as an actual Ishikawa skeleton (spine + a diagonal bone per category, angled the same
- * direction top and bottom so they read as sweeping toward the head) rather than a grid of
- * boxes — each bone is a small fixed-size SVG connector, decoupled from how much text a
- * category holds, so it stays a real diagram under editing, empty categories, and long cause
- * lists alike. */
+ * Drawn as an actual Ishikawa skeleton: three category cards above a horizontal spine, three
+ * below, each connected to it by a short 40°-angled bone centered under/over its card. The
+ * bones are fixed-size and live in their own band between the rows, so the geometry never
+ * depends on how much text a category holds. */
 export default function Fishbone({
   incidentId,
   causes,
@@ -43,23 +52,35 @@ export default function Fishbone({
   }
 
   const causesFor = (cat: FishboneCategory) => causes.filter((c) => c.category === cat)
+  const isPicked = (cat: FishboneCategory) => causesFor(cat).some((c) => c.promoted_why_step_id)
 
-  const branch = (cat: FishboneCategory, side: 'top' | 'bottom') => {
+  const branch = (cat: FishboneCategory) => {
     const catCauses = causesFor(cat)
     return (
-      <CategoryBranch
-        key={cat}
-        category={cat}
-        causes={catCauses}
-        side={side}
-        chainStarted={chainStarted}
-        editing={editing}
-        onAdd={(description) => addCause.mutate({ category: cat, description })}
-        addPending={addCause.isPending}
-        onPromote={(causeId) => promoteCause.mutate(causeId)}
-        onDelete={(causeId) => deleteCause.mutate(causeId)}
-        promoting={promoteCause.isPending}
-      />
+      <div className="fishbone__category" key={cat}>
+        <h3 className="fishbone__category-label">{FISHBONE_CATEGORY_LABEL[cat]}</h3>
+        <div className="fishbone__causes">
+          {catCauses.map((cause) => (
+            <CauseChip
+              key={cause.id}
+              cause={cause}
+              chainStarted={chainStarted}
+              editing={editing}
+              onPromote={() => promoteCause.mutate(cause.id)}
+              onDelete={() => deleteCause.mutate(cause.id)}
+              promoting={promoteCause.isPending}
+            />
+          ))}
+          {catCauses.length === 0 && !editing && <p className="fishbone__empty-cat">—</p>}
+          {editing && !chainStarted && (
+            <AddCauseForm
+              category={cat}
+              onAdd={(description) => addCause.mutate({ category: cat, description })}
+              pending={addCause.isPending}
+            />
+          )}
+        </div>
+      </div>
     )
   }
 
@@ -76,99 +97,33 @@ export default function Fishbone({
       </div>
 
       <div className="fishbone__diagram">
-        <div className="fishbone__row fishbone__row--top">
-          {TOP_CATEGORIES.map((cat) => branch(cat, 'top'))}
-        </div>
-        <div className="fishbone__spine" aria-hidden="true" />
-        <div className="fishbone__row fishbone__row--bottom">
-          {BOTTOM_CATEGORIES.map((cat) => branch(cat, 'bottom'))}
-        </div>
+        <div className="fishbone__row">{TOP_CATEGORIES.map(branch)}</div>
+        <SpineBand topPicked={TOP_CATEGORIES.map(isPicked)} bottomPicked={BOTTOM_CATEGORIES.map(isPicked)} />
+        <div className="fishbone__row">{BOTTOM_CATEGORIES.map(branch)}</div>
       </div>
     </section>
   )
 }
 
-function BoneConnector({ side, picked }: { side: 'top' | 'bottom'; picked: boolean }) {
-  // Same diagonal both rows, sweeping down-right (top) / up-right (bottom) — i.e. always
-  // leaning toward the spine's head end on the right, like real fishbone ribs. The end nearer
-  // the spine sits flush with the SVG's own edge (y=0 or y=24) so it actually meets the spine
-  // line below/above it, not just points vaguely toward it.
-  const [y1, y2] = side === 'top' ? [2, 24] : [22, 0]
+function SpineBand({ topPicked, bottomPicked }: { topPicked: boolean[]; bottomPicked: boolean[] }) {
   return (
-    <svg
-      className={`fishbone__bone${picked ? ' fishbone__bone--picked' : ''}`}
-      viewBox="0 0 100 24"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <line x1="6" y1={y1} x2="94" y2={y2} />
-    </svg>
-  )
-}
-
-function CategoryBranch({
-  category,
-  causes,
-  side,
-  chainStarted,
-  editing,
-  onAdd,
-  addPending,
-  onPromote,
-  onDelete,
-  promoting,
-}: {
-  category: FishboneCategory
-  causes: FishboneCause[]
-  side: 'top' | 'bottom'
-  chainStarted: boolean
-  editing: boolean
-  onAdd: (description: string) => void
-  addPending: boolean
-  onPromote: (causeId: string) => void
-  onDelete: (causeId: string) => void
-  promoting: boolean
-}) {
-  const picked = causes.some((c) => c.promoted_why_step_id)
-
-  const content = (
-    <div className="fishbone__category-body">
-      <h3 className="fishbone__category-label">{FISHBONE_CATEGORY_LABEL[category]}</h3>
-      <div className="fishbone__causes">
-        {causes.map((cause) => (
-          <CauseChip
-            key={cause.id}
-            cause={cause}
-            chainStarted={chainStarted}
-            editing={editing}
-            onPromote={() => onPromote(cause.id)}
-            onDelete={() => onDelete(cause.id)}
-            promoting={promoting}
-          />
-        ))}
-        {causes.length === 0 && !editing && <p className="fishbone__empty-cat">—</p>}
-        {editing && !chainStarted && (
-          <AddCauseForm category={category} onAdd={onAdd} pending={addPending} />
-        )}
-      </div>
-    </div>
-  )
-
-  const connector = <BoneConnector side={side} picked={picked} />
-
-  return (
-    <div className={`fishbone__category fishbone__category--${side}`}>
-      {side === 'top' ? (
-        <>
-          {content}
-          {connector}
-        </>
-      ) : (
-        <>
-          {connector}
-          {content}
-        </>
-      )}
+    <div className="fishbone__spine-band" aria-hidden="true">
+      <div className="fishbone__spine-line" />
+      <div className="fishbone__spine-head" />
+      {BONE_POSITIONS.map((x, i) => (
+        <span
+          key={`top-${i}`}
+          className={`fishbone__bone fishbone__bone--top${topPicked[i] ? ' fishbone__bone--picked' : ''}`}
+          style={{ left: x }}
+        />
+      ))}
+      {BONE_POSITIONS.map((x, i) => (
+        <span
+          key={`bottom-${i}`}
+          className={`fishbone__bone fishbone__bone--bottom${bottomPicked[i] ? ' fishbone__bone--picked' : ''}`}
+          style={{ left: x }}
+        />
+      ))}
     </div>
   )
 }
