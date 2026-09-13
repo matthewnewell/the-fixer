@@ -54,21 +54,20 @@
 .fishbone__spine {
   position: relative;
   height: 2px;
-  margin: 4px 0;
   background: var(--color-border-strong);
 }
 
+/* A small pinhead, same convention as the splash figure's fishbone diagram — not an arrowhead. */
 .fishbone__spine::after {
   content: '';
   position: absolute;
   top: 50%;
-  right: -1px;
-  width: 0;
-  height: 0;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
   transform: translateY(-50%);
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 8px solid var(--color-border-strong);
 }
 
 .fishbone__category {

@@ -90,8 +90,10 @@ export default function Fishbone({
 
 function BoneConnector({ side, picked }: { side: 'top' | 'bottom'; picked: boolean }) {
   // Same diagonal both rows, sweeping down-right (top) / up-right (bottom) — i.e. always
-  // leaning toward the spine's head end on the right, like real fishbone ribs.
-  const [y1, y2] = side === 'top' ? [3, 21] : [21, 3]
+  // leaning toward the spine's head end on the right, like real fishbone ribs. The end nearer
+  // the spine sits flush with the SVG's own edge (y=0 or y=24) so it actually meets the spine
+  // line below/above it, not just points vaguely toward it.
+  const [y1, y2] = side === 'top' ? [2, 24] : [22, 0]
   return (
     <svg
       className={`fishbone__bone${picked ? ' fishbone__bone--picked' : ''}`}
