@@ -13,20 +13,21 @@ const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caug
 // Geometry for the splash figure's fishbone diagram — a real Ishikawa skeleton (spine + tail +
 // diagonal bones), not just a box of category chips. Coordinates live in a 0–150 × 0–200
 // space matching the diagram's aspect-ratio box, so both the SVG lines and the absolutely
-// positioned chip labels can be derived from the same numbers and stay lined up.
+// positioned chip labels can be derived from the same numbers and stay lined up. Head at the
+// top, tail at the bottom, feeding down into the connector arrow toward the Why chain.
 const FISHBONE_VIEWBOX = { w: 150, h: 200 }
 const FISHBONE_BONES = (
   [
-    { category: 'Man', side: 'left', y: 40 },
-    { category: 'Machine', side: 'right', y: 66 },
-    { category: 'Method', side: 'left', y: 92 },
-    { category: 'Material', side: 'right', y: 118 },
-    { category: 'Measurement', side: 'left', y: 144 },
-    { category: 'Environment', side: 'right', y: 170 },
+    { category: 'Man', side: 'left', y: 160 },
+    { category: 'Machine', side: 'right', y: 134 },
+    { category: 'Method', side: 'left', y: 108 },
+    { category: 'Material', side: 'right', y: 82 },
+    { category: 'Measurement', side: 'left', y: 56 },
+    { category: 'Environment', side: 'right', y: 30 },
   ] as const
 ).map((b) => {
   const tipX = b.side === 'left' ? 28 : 122
-  const tipY = b.y - 16
+  const tipY = b.y + 16
   return {
     ...b,
     tipX,
@@ -92,10 +93,10 @@ export default function SplashPage() {
                       aria-hidden="true"
                     >
                       {/* tail fin */}
-                      <line x1="75" y1="18" x2="58" y2="2" />
-                      <line x1="75" y1="18" x2="92" y2="2" />
+                      <line x1="75" y1="182" x2="58" y2="198" />
+                      <line x1="75" y1="182" x2="92" y2="198" />
                       {/* spine */}
-                      <line x1="75" y1="18" x2="75" y2="178" />
+                      <line x1="75" y1="182" x2="75" y2="22" />
                       {/* one bone per category, angled back toward the tail */}
                       {FISHBONE_BONES.map((b) => (
                         <line
@@ -108,7 +109,7 @@ export default function SplashPage() {
                         />
                       ))}
                       {/* head, where every bone converges — the "effect" the chain picks up from */}
-                      <circle className="splash-fishbone__head" cx="75" cy="182" r="5" />
+                      <circle className="splash-fishbone__head" cx="75" cy="18" r="5" />
                     </svg>
                     {FISHBONE_BONES.map((b) => (
                       <span
