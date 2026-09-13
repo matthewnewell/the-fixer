@@ -10,7 +10,31 @@ const DEMO_CASE_ID = 'demo-casting-rework'
 
 const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caught?', 'Why is there no check?']
 
-const FISHBONE_CATEGORIES = ['Man', 'Machine', 'Method', 'Material', 'Measurement', 'Environment']
+// Geometry for the splash figure's fishbone diagram — a real Ishikawa skeleton (spine + tail +
+// diagonal bones), not just a box of category chips. Coordinates live in a 0–150 × 0–200
+// space matching the diagram's aspect-ratio box, so both the SVG lines and the absolutely
+// positioned chip labels can be derived from the same numbers and stay lined up.
+const FISHBONE_VIEWBOX = { w: 150, h: 200 }
+const FISHBONE_BONES = (
+  [
+    { category: 'Man', side: 'left', y: 40 },
+    { category: 'Machine', side: 'right', y: 66 },
+    { category: 'Method', side: 'left', y: 92 },
+    { category: 'Material', side: 'right', y: 118 },
+    { category: 'Measurement', side: 'left', y: 144 },
+    { category: 'Environment', side: 'right', y: 170 },
+  ] as const
+).map((b) => {
+  const tipX = b.side === 'left' ? 28 : 122
+  const tipY = b.y - 16
+  return {
+    ...b,
+    tipX,
+    tipY,
+    leftPct: (tipX / FISHBONE_VIEWBOX.w) * 100,
+    topPct: (tipY / FISHBONE_VIEWBOX.h) * 100,
+  }
+})
 
 const FEATURES = [
   {
@@ -61,13 +85,38 @@ export default function SplashPage() {
               <div className="splash-layout">
                 <div className="splash-fishbone">
                   <div className="splash-fishbone__label">Fishbone</div>
-                  <div className="splash-fishbone__grid">
-                    {FISHBONE_CATEGORIES.map((cat) => (
+                  <div className="splash-fishbone__diagram">
+                    <svg
+                      className="splash-fishbone__svg"
+                      viewBox={`0 0 ${FISHBONE_VIEWBOX.w} ${FISHBONE_VIEWBOX.h}`}
+                      aria-hidden="true"
+                    >
+                      {/* tail fin */}
+                      <line x1="75" y1="18" x2="58" y2="2" />
+                      <line x1="75" y1="18" x2="92" y2="2" />
+                      {/* spine */}
+                      <line x1="75" y1="18" x2="75" y2="178" />
+                      {/* one bone per category, angled back toward the tail */}
+                      {FISHBONE_BONES.map((b) => (
+                        <line
+                          key={b.category}
+                          x1="75"
+                          y1={b.y}
+                          x2={b.tipX}
+                          y2={b.tipY}
+                          className={b.category === 'Man' ? 'splash-fishbone__bone--picked' : undefined}
+                        />
+                      ))}
+                      {/* head, where every bone converges — the "effect" the chain picks up from */}
+                      <circle className="splash-fishbone__head" cx="75" cy="182" r="5" />
+                    </svg>
+                    {FISHBONE_BONES.map((b) => (
                       <span
-                        key={cat}
-                        className={`splash-fishbone__chip${cat === 'Man' ? ' splash-fishbone__chip--picked' : ''}`}
+                        key={b.category}
+                        className={`splash-fishbone__chip${b.category === 'Man' ? ' splash-fishbone__chip--picked' : ''}`}
+                        style={{ left: `${b.leftPct}%`, top: `${b.topPct}%` }}
                       >
-                        {cat}
+                        {b.category}
                       </span>
                     ))}
                   </div>

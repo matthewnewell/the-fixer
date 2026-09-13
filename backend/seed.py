@@ -49,9 +49,31 @@ def seed_if_empty():
     db.session.add(casting)
     db.session.flush()
 
+    # Fishbone brainstorm — done before the Why chain, same as the NDT case below: candidates
+    # considered across three categories, one promoted, its description becoming the first
+    # why's answer. This is the demo case the splash page and "Demo" nav link point at, so it's
+    # the one that most needs a fishbone history behind it.
+    casting_fishbone = [
+        ("material", "The casting didn't match the as-built mounting hole pattern discovered during Build.", True),
+        ("method", "Long-lead procurement is gated on Architecture Definition, not the released drawing, so it locks in before the design is final.", False),
+        ("man", "No one owns reconciling a design change against already-open long-lead purchase orders.", False),
+    ]
+    casting_promoted_cause = None
+    casting_promoted_description = None
+    for category, description, promoted in casting_fishbone:
+        cause = FishboneCause(
+            incident_id=casting.id, category=category, description=description,
+            created_by="Sam Ortiz (PM)", created_at=casting.created_at + timedelta(hours=1),
+        )
+        db.session.add(cause)
+        db.session.flush()
+        if promoted:
+            casting_promoted_cause = cause
+            casting_promoted_description = description
+
     casting_whys = [
         ("Why did the long-lead casting have to be re-ordered?",
-         "The casting didn't match the as-built mounting hole pattern discovered during Build.", False),
+         casting_promoted_description, False),
         ("Why didn't it match?",
          "Design Definition changed the hole pattern after the long-lead casting was already on order.", False),
         ("Why was the casting ordered before the design was final?",
@@ -61,11 +83,17 @@ def seed_if_empty():
         ("Why is there no such check?",
          "Design change review doesn't include a step to cross-check open long-lead procurement commitments.", True),
     ]
+    casting_first_step = None
     for i, (q, a, root) in enumerate(casting_whys, start=1):
-        db.session.add(WhyStep(
+        step = WhyStep(
             incident_id=casting.id, sequence=i, question=q, answer=a, is_root_cause=root,
             created_by="Sam Ortiz (PM)", created_at=casting.created_at + i * DAY,
-        ))
+        )
+        db.session.add(step)
+        db.session.flush()
+        if i == 1:
+            casting_first_step = step
+    casting_promoted_cause.promoted_why_step_id = casting_first_step.id
 
     corrective = Action(
         incident_id=casting.id, kind="corrective",
