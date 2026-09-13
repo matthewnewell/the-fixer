@@ -13,7 +13,6 @@
 .action-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
@@ -67,6 +66,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  /* Always pinned to the row's right edge — including when __main's own text wraps and pushes
+     this onto its own line, where space-between (relying on it having a sibling to space
+     against) would otherwise drop it to the left instead. */
+  margin-left: auto;
 }
 
 .action-row__right select {
