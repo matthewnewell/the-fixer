@@ -18,8 +18,11 @@ const CHAIN = ['Why did it fail?', 'Why did that happen?', 'Why wasn’t it caug
 const FISHBONE_VIEWBOX = { w: 150, h: 200 }
 const FISHBONE_BONES = (
   [
-    { category: 'Man', side: 'left', y: 160 },
-    { category: 'Machine', side: 'right', y: 134 },
+    // Man (the promoted category, highlighted green) sits on the lower-right rib — nearest
+    // the connector arrow into the 5 Whys panel, so the promoted cause visually flows straight
+    // into the chain it started, instead of crossing back over from the opposite side.
+    { category: 'Machine', side: 'left', y: 160 },
+    { category: 'Man', side: 'right', y: 134 },
     { category: 'Method', side: 'left', y: 108 },
     { category: 'Material', side: 'right', y: 82 },
     { category: 'Measurement', side: 'left', y: 56 },
