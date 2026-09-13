@@ -34,13 +34,67 @@
   color: var(--color-text-faint);
 }
 
-.fishbone__grid {
+/* An actual Ishikawa skeleton — three categories above a horizontal spine, three below, each
+   connected to it by a short diagonal bone (a small fixed-size SVG, so it stays a real line
+   regardless of how much a category holds). Both rows' bones lean the same direction (toward
+   the spine's arrowhead on the right) so they read as sweeping back toward one head, the way
+   real fishbone ribs do. Collapses to a plain stacked list — no spine, no bones — below
+   640px, where the diagonal geometry stops being legible at that width anyway. */
+.fishbone__diagram {
+  display: flex;
+  flex-direction: column;
+}
+
+.fishbone__row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.fishbone__spine {
+  position: relative;
+  height: 2px;
+  margin: 4px 0;
+  background: var(--color-border-strong);
+}
+
+.fishbone__spine::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  width: 0;
+  height: 0;
+  transform: translateY(-50%);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid var(--color-border-strong);
 }
 
 .fishbone__category {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fishbone__bone {
+  display: block;
+  width: 100%;
+  height: 20px;
+}
+
+.fishbone__bone line {
+  stroke: var(--color-border-strong);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.fishbone__bone--picked line {
+  stroke: var(--color-success);
+  stroke-width: 2.5;
+}
+
+.fishbone__category-body {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -57,6 +111,18 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--color-accent);
+}
+
+@media (max-width: 640px) {
+  .fishbone__row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .fishbone__spine,
+  .fishbone__bone {
+    display: none;
+  }
 }
 
 .fishbone__causes {
