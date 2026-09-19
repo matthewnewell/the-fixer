@@ -1,3 +1,4 @@
+import { DrawerLayout } from '@conways/drawer'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useHealth, useIncident, useUpdateIncident } from '../api/hooks'
@@ -7,8 +8,11 @@ import Fishbone from '../components/Fishbone'
 import WhyChain from '../components/WhyChain'
 import ActionsList from '../components/ActionsList'
 import Journal from '../components/Journal'
-import ChatPanel from '../components/ChatPanel'
 import './IncidentDetailPage.css'
+
+// This app's own id in Conway's Depot's registry. The Fixer stays Depot-unaware (it never learns
+// a Depot project id), so the shared Journal resolves the project from this + the incident id.
+const DEPOT_APPLICATION_ID = '258a0d94-d960-479d-813f-aad09e66684e'
 
 type Tab = 'root_cause' | 'capa' | 'journal'
 
@@ -17,7 +21,6 @@ export default function IncidentDetailPage() {
   const { data: incident, isLoading } = useIncident(incidentId)
   const { data: health } = useHealth()
   const updateIncident = useUpdateIncident(incidentId ?? '')
-  const [chatOpen, setChatOpen] = useState(false)
   const [tab, setTab] = useState<Tab>('root_cause')
   // Every case opens read-only — a document you scan, not a form you're dropped into. Applies
   // uniformly (not just closed cases): editing is one click away, but the default should never
@@ -33,7 +36,21 @@ export default function IncidentDetailPage() {
   return (
     <div className="incident-layout">
       <Nav />
-      <div className="incident-layout__row">
+      <DrawerLayout
+        scrollMain={false}
+        agent={{
+          chatUrl: '/api/chat',
+          chatExtra: { incident_id: incident.id },
+          aiConfigured: health?.ai_configured ?? false,
+          intro: "Ask about this case — whether an answer is a real cause or a restated symptom, and what to ask next.",
+          starters: [
+            'Is the last answer a real cause, or just a restated symptom?',
+            "What's a sharper next why?",
+            'Does this look like a real root cause yet?',
+          ],
+        }}
+        journal={{ resolve: { applicationId: DEPOT_APPLICATION_ID, externalRef: incident.id } }}
+      >
         <div className="incident-detail">
           <div className="incident-detail__inner">
             <header className="incident-detail__header">
@@ -111,18 +128,7 @@ export default function IncidentDetailPage() {
           </div>
         </div>
 
-        {chatOpen ? (
-          <ChatPanel
-            incidentId={incident.id}
-            aiConfigured={health?.ai_configured ?? false}
-            onCollapse={() => setChatOpen(false)}
-          />
-        ) : (
-          <button className="incident-layout__chat-tab" onClick={() => setChatOpen(true)} title="Open chat">
-            ✨ Chat
-          </button>
-        )}
-      </div>
+      </DrawerLayout>
     </div>
   )
 }
