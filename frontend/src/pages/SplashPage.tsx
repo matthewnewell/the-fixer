@@ -71,9 +71,9 @@ export default function SplashPage() {
       <div className="splash-page__scroll">
         <div className="splash-page__content">
           <header className="splash-hero">
-            <h1 className="splash-hero__title">The Fixer</h1>
+            <h1 className="splash-hero__title">AI-Guided Root Cause Analysis</h1>
             <p className="splash-hero__sub">
-              AI-guided root cause analysis — from fishbone brainstorm to CAPA plan.
+              Find the Defect, Prove the Fix, and Eliminate Recurrence.
               <button
                 className="splash-info-btn"
                 onClick={() => setInfoOpen(true)}
