@@ -12,7 +12,9 @@ const STATUS_LABEL: Record<IncidentStatus, string> = {
 
 export default function CasesPage() {
   const navigate = useNavigate()
-  const [project, setProject] = useState('')
+  // Linked from a project's page in Conway's Depot as /?project=<name> — open pre-filtered so a
+  // project only sees its own cases.
+  const [project, setProject] = useState(() => new URLSearchParams(window.location.search).get('project') ?? '')
   const [status, setStatus] = useState('')
   const { data: projects } = useProjects()
   const { data: incidents, isLoading } = useIncidents({ project: project || undefined, status: status || undefined })

@@ -17,8 +17,8 @@ from db import db
 from models import Action, FishboneCause, Incident, IncidentEvent, WhyStep, _now
 
 DAY = timedelta(days=1)
-_BKT = "Demo: Bracket Assembly Program"
-_NAC = "Demo: Nacelle Fairing Retrofit"
+_BKT = "Bracket Assembly Program"
+_NAC = "Nacelle Fairing Retrofit"
 _PORTFOLIO = "Industrial Programs"  # same demo portfolio DWMP's assemblies sit under
 
 # Fixed (not random-uuid) id for the fully-worked demo case, so the splash page's demo link
@@ -180,4 +180,35 @@ def seed_if_empty():
             first_step = step
     promoted_cause.promoted_why_step_id = first_step.id
 
+    db.session.commit()
+
+
+_RAD = "Radar Housing Production"
+_DEF_PORTFOLIO = "Defense Systems"
+
+# (title, description, project, portfolio, reported_by, status, days ago)
+_EXTRA_CASES = [
+    (
+        "Fairing lay-up voids found at NDI",
+        "Two consecutive fairing panels showed voids at NDI after autoclave cure. Routed here from Mission Assurance.",
+        _NAC, _PORTFOLIO, "Priya Nair (Mission Assurance)", "open", 8,
+    ),
+    (
+        "Titanium forging arrival slipped two weeks",
+        "The forging supplier moved the promise date twice; machining had to be re-sequenced to absorb it.",
+        _RAD, _DEF_PORTFOLIO, "Alex Chen (Engineering)", "investigating", 10,
+    ),
+]
+
+
+def seed_extra_cases():
+    """Cases for the demo projects beyond the two original ones, so a project's tile in Conway's
+    Depot has something to show. Idempotent (skips a title that already exists)."""
+    for title, description, project, portfolio, reported_by, status, days_ago in _EXTRA_CASES:
+        if Incident.query.filter_by(title=title).first():
+            continue
+        db.session.add(Incident(
+            title=title, description=description, project=project, portfolio=portfolio,
+            reported_by=reported_by, status=status, created_at=_now() - days_ago * DAY,
+        ))
     db.session.commit()
