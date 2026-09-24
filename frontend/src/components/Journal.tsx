@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useAddIncidentEvent, useDeleteIncidentEvent, useIncidentEvents } from '../api/hooks'
 import type { EventTargetType, IncidentEvent } from '../api/types'
-import { getAuthor, relativeTime, setAuthor } from '../lib/journal'
+import { relativeTime } from '../lib/journal'
+import { usePersona } from '../lib/persona'
 import './Journal.css'
 
 interface JournalProps {
@@ -10,6 +11,8 @@ interface JournalProps {
   target?: { type: EventTargetType; id: string; name: string }
   /** Clicking a target name jumps back to the tab that shows it (Root Cause / CAPA). */
   onTargetClick?: (targetType: EventTargetType) => void
+  /** History only: no composer (the case Record shows it this way). */
+  readOnly?: boolean
 }
 
 interface Group {
@@ -54,23 +57,21 @@ function groupEvents(events: IncidentEvent[]): Group[] {
 
 const TARGET_LABEL: Record<string, string> = { why_step: 'why', action: 'action' }
 
-export default function Journal({ incidentId, target, onTargetClick }: JournalProps) {
+export default function Journal({ incidentId, target, onTargetClick, readOnly }: JournalProps) {
   const { data: events, isLoading } = useIncidentEvents(incidentId, target?.id)
   const addEvent = useAddIncidentEvent(incidentId)
   const deleteEvent = useDeleteIncidentEvent(incidentId)
 
   const [text, setText] = useState('')
-  const [name, setName] = useState(getAuthor())
-  const author = getAuthor()
+  const author = usePersona().persona?.name ?? ''
 
   function submit() {
     const note = text.trim()
     if (!note) return
-    if (name.trim() && name.trim() !== author) setAuthor(name)
     addEvent.mutate(
       {
         note,
-        author: (name.trim() || author) || undefined,
+        author: author || undefined,
         ...(target
           ? { target_type: target.type, target_id: target.id, target_name: target.name }
           : { target_type: 'incident' as const }),
@@ -87,6 +88,7 @@ export default function Journal({ incidentId, target, onTargetClick }: JournalPr
 
   return (
     <div className="journal">
+      {!readOnly && (
       <div className="journal__composer">
         <textarea
           className="journal__input"
@@ -106,14 +108,6 @@ export default function Journal({ incidentId, target, onTargetClick }: JournalPr
           }}
         />
         <div className="journal__composer-row">
-          {!author && (
-            <input
-              className="journal__name"
-              placeholder="your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          )}
           {author && <span className="journal__as">as {author}</span>}
           <button className="journal__add" onClick={submit} disabled={!text.trim() || addEvent.isPending}>
             {addEvent.isPending ? 'Adding…' : 'Add note'}
@@ -125,6 +119,7 @@ export default function Journal({ incidentId, target, onTargetClick }: JournalPr
           </p>
         )}
       </div>
+      )}
 
       {deleteEvent.isError && (
         <p className="journal__error">

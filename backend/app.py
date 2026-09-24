@@ -5,6 +5,7 @@ from flask import Flask, send_from_directory
 from db import init_db
 from routes.ai import bp as ai_bp
 from routes.incidents import bp as incidents_bp
+from routes.people import bp as people_bp
 from routes.summary import bp as summary_bp
 from seed import seed_extra_cases, seed_if_empty
 
@@ -19,6 +20,7 @@ def create_app():
     app.register_blueprint(incidents_bp)
     app.register_blueprint(summary_bp)
     app.register_blueprint(ai_bp)
+    app.register_blueprint(people_bp)
 
     with app.app_context():
         seed_if_empty()

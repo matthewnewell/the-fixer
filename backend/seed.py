@@ -17,7 +17,7 @@ from db import db
 from models import Action, FishboneCause, Incident, IncidentEvent, WhyStep, _now
 
 DAY = timedelta(days=1)
-_BKT = "Bracket Assembly Program"
+_BKT = "Bracket Assembly Project"
 _NAC = "Nacelle Fairing Retrofit"
 _PORTFOLIO = "Industrial Programs"  # same demo portfolio DWMP's assemblies sit under
 

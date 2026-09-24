@@ -4,33 +4,38 @@ Root cause analysis (5 Whys) and Corrective/Preventive Action (CAPA), guided as 
 
 ## The idea
 
-When something fails, the usual path is a paperwork exercise after the fact: a form with a
-"root cause" text box nobody really interrogates, and a CAPA record that gets filled in to
-close the ticket rather than to actually change anything. The Fixer tries to make working the
-problem itself the easy part:
+When something fails, the usual path is a paperwork exercise after the fact. The Fixer makes
+working the problem the easy part, one step at a time, with a step bar that always shows where a
+case is: **Describe → Brainstorm → 5 Whys → Actions → Verify → Closed**.
 
-1. **Fishbone brainstorm** — when more than one thing could plausibly be the cause, sort
-   candidates into the six classic Ishikawa categories (Man/Machine/Method/Material/
-   Measurement/Environment) before committing to one. It's a predecessor to the Why chain,
-   not a competing canvas: promoting a cause is what starts the chain, and promotion is only
-   available while the chain is still empty, so there's never a branching or multi-chain case
-   to reconcile.
-2. **5 Whys** — a straight chain, one link at a time: why did it fail, why did *that* happen,
-   and so on, until you reach something you can act on. A case can skip the brainstorm
-   entirely and go straight to the chain when the cause is already obvious.
-3. **Corrective and Preventive Actions** — fixing this occurrence and stopping the mechanism
-   from recurring are different actions, tracked separately, each with an owner and a
-   verification step (a CAPA action isn't done when someone says it's done — it's done when
-   someone confirms it actually worked).
-4. **An AI assistant scoped to the case**, not a "suggest" button on every field — the same
-   lesson learned building Value Stream (a per-field AI-suggest badge was tried there and
-   pulled back out in favor of one persistent chat pane). It's there to catch the classic
-   5-Whys failure mode: an answer that just restates the symptom, or a chain that stalls out on
-   "human error" instead of something the org can actually change.
+1. **Describe**: what failed, where, when, how many, and how it was found.
+2. **Brainstorm (fishbone)**: possible causes across Man, Machine, Method, Material,
+   Measurement, Environment. Choose up to **three** to chase; each gets its own 5-Whys chain.
+3. **5 Whys**: a ladder per chain, from the problem down to a root cause. Each answer says how we
+   know it (fact or hypothesis), weak answers get flagged ("human error", restated symptoms), a
+   "therefore" check reads the chain back upward, and marking a root cause takes the root-cause
+   test: we control it, fixing it would have prevented this, the evidence backs it up.
+4. **Actions**: containment (now), corrective (this occurrence), preventive (the root cause).
+   Every root cause needs a corrective or preventive action; every action has an owner from the
+   Depot's people list and says up front how we'll know it worked.
+5. **Verify**: an action is verified with evidence, by the person in the user menu.
+6. **Closed**: closing needs every chain at a root cause, every root cause answered, and every
+   action verified, or a stated reason for closing anyway.
+
+**The Guide** ("Guide me" on each step) coaches someone who's never done root cause analysis:
+one question at a time, specific to the case. It turns answers into suggestion cards (a problem
+statement, a cause, a why with its evidence, an action); nothing goes on the case until a person
+clicks Add, and the server drops any card that doesn't fit the case. The Agent/Journal drawer is
+the ecosystem's shared one for free chat and the project Journal.
+
+**The case is the record.** The Record view is the case's own data (problem, chains, root causes,
+actions, verification evidence, history), always current, at its own link. There's no report to
+generate. Milestones (case opened, root cause found, action verified, case closed) post to the
+project's Journal in Conway's Depot, written by code from the change, credited to whoever did it.
 
 ## Stack
 
-Same as Value Stream / Conway's Depot / Dude-Where's-My-Part — Flask + SQLAlchemy + SQLite
+Same as Value Stream / Conway's Depot / MARTI: Flask + SQLAlchemy + SQLite
 backend, React + TypeScript + Vite frontend, tied to the rest of the ecosystem only by
 convention (plain-text `project` labels), no shared database.
 

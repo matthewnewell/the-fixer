@@ -12,17 +12,24 @@ step that decides where to start, not a competing analysis mode. It is deliberat
 canvas: no positions, no branching structure to draw, just a categorized list. Fishbone's real
 failure mode in practice is shallow one-word answers per category with nobody ever asking "why"
 under any of them — so its only real job here is generating candidates worth promoting, and
-promoting one is exactly what starts the linear WhyStep chain above (its `answer` seeded from
-the cause's description). Because this app's chain is a single straight line, not a tree,
-promoting is only allowed while that chain is still empty — see routes/incidents.py. A cause
-that never gets promoted stays on the record as "considered and set aside," not deleted.
+promoting one starts a WhyStep chain of its own (its first `answer` seeded from the cause's
+description). Real failures often have more than one contributing cause, so up to
+MAX_CHAINS causes can be promoted, each with its own straight chain and its own root cause; a
+chain's steps carry the promoted cause's id (`cause_id`). A case that skips the brainstorm gets
+one "direct" chain (`cause_id` null). A cause that never gets promoted stays on the record as
+"considered and set aside," not deleted.
 
-An Action is a Corrective or Preventive Action (CAPA) against the incident — fixing what broke
-this time (corrective) vs. changing something so it can't happen again (preventive). Both live
-on the same list because in practice a real CAPA record almost always has one of each.
+An Action is a Containment, Corrective or Preventive Action against the incident: stopping the
+bleeding right now (containment: quarantine, sort, re-inspect), fixing what broke this time
+(corrective), or changing something so it can't happen again (preventive). An action links to
+the why-step it addresses (usually a root cause) and says up front how anyone will know it
+worked (`verification_method`, `effectiveness_check_date`). Verifying one takes evidence.
+
+The case itself is the record. There's no separate report: the Record view is the same data,
+always current.
 """
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from db import _uuid, db
 
@@ -32,7 +39,9 @@ def _now():
 
 
 INCIDENT_STATUSES = ("open", "investigating", "closed")
-ACTION_KINDS = ("corrective", "preventive")
+ACTION_KINDS = ("containment", "corrective", "preventive")
+EVIDENCE_KINDS = ("fact", "hypothesis")
+MAX_CHAINS = 3  # causes a case can chase at once, each with its own 5-Whys chain
 ACTION_STATUSES = ("open", "in_progress", "done", "verified")
 # The classic Ishikawa 6M's, minus Mother Nature (folded into Environment) — fixed, not
 # user-defined, the same way ACTION_KINDS is fixed. Order matters: this is the order every
@@ -56,6 +65,8 @@ class Incident(db.Model):
     status = db.Column(db.String(20), nullable=False, default="open")  # see INCIDENT_STATUSES
     created_at = db.Column(db.DateTime, default=_now, nullable=False)
     closed_at = db.Column(db.DateTime, nullable=True)
+    # Set when someone closes a case without every chain at a root cause and every action verified.
+    close_override_reason = db.Column(db.Text, nullable=True)
 
     fishbone_causes = db.relationship(
         "FishboneCause", backref="incident", cascade="all, delete-orphan", lazy="selectin",
@@ -86,12 +97,60 @@ class Incident(db.Model):
             "action_count": len(self.actions),
             "has_root_cause": any(w.is_root_cause for w in self.why_steps),
             "open_action_count": sum(1 for a in self.actions if a.status != "verified"),
+            "overdue_action_count": sum(
+                1 for a in self.actions
+                if a.status not in ("done", "verified") and a.due_date and a.due_date < date.today()
+            ),
+            "close_override_reason": self.close_override_reason,
+            **self.progress(),
         }
         if include_children:
             d["fishbone_causes"] = [f.to_dict() for f in self.fishbone_causes]
             d["why_steps"] = [w.to_dict() for w in self.why_steps]
+            d["chains"] = self.chains()
             d["actions"] = [a.to_dict() for a in self.actions]
         return d
+
+    def chains(self) -> list[dict]:
+        """The 5-Whys chains: one per promoted cause (in promotion order), plus a "direct" chain
+        for steps not started from the fishbone."""
+        by_cause: dict = {}
+        for w in self.why_steps:
+            by_cause.setdefault(w.cause_id, []).append(w)
+        causes = {c.id: c for c in self.fishbone_causes}
+        out = []
+        for cause_id, steps in by_cause.items():
+            steps.sort(key=lambda w: w.sequence)
+            root = next((w for w in steps if w.is_root_cause), None)
+            cause = causes.get(cause_id)
+            out.append({
+                "id": cause_id or "direct",
+                "cause": cause.to_dict() if cause else None,
+                "steps": [w.to_dict() for w in steps],
+                "root_step_id": root.id if root else None,
+            })
+        out.sort(key=lambda c: min(s["created_at"] for s in c["steps"]))  # in the order they were started
+        return out
+
+    def progress(self) -> dict:
+        """Where the case is: Describe → Brainstorm → 5 Whys → Actions → Verify → Closed, each
+        done or not, and the first one that isn't (the stage to work next)."""
+        chains = self.chains()
+        roots = [c["root_step_id"] for c in chains if c["root_step_id"]]
+        linked = {a.why_step_id for a in self.actions if a.kind in ("corrective", "preventive")}
+        stages = [
+            ("describe", "Describe", bool((self.description or "").strip())),
+            ("brainstorm", "Brainstorm", bool(chains)),
+            ("whys", "5 Whys", bool(chains) and all(c["root_step_id"] for c in chains)),
+            ("actions", "Actions", bool(roots) and all(r in linked for r in roots)),
+            ("verify", "Verify", bool(self.actions) and all(a.status == "verified" for a in self.actions)),
+            ("closed", "Closed", self.status == "closed"),
+        ]
+        current = "closed" if self.status == "closed" else next((k for k, _, done in stages if not done), "closed")
+        return {
+            "stages": [{"key": k, "label": label, "done": done} for k, label, done in stages],
+            "stage": current,
+        }
 
 
 class FishboneCause(db.Model):
@@ -140,6 +199,14 @@ class WhyStep(db.Model):
     is_root_cause = db.Column(db.Boolean, default=False, nullable=False)
     created_by = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime, default=_now, nullable=False)
+    # The promoted fishbone cause this chain started from; null for a "direct" chain.
+    cause_id = db.Column(db.String(36), db.ForeignKey("fishbone_cause.id"), nullable=True, index=True)
+    # "How do we know?" — what backs this answer up, and whether it's established or still a guess.
+    evidence = db.Column(db.Text, nullable=True)
+    evidence_kind = db.Column(db.String(20), nullable=True)  # see EVIDENCE_KINDS
+    # The root-cause test, answered before marking a step the root cause:
+    # {"controllable": bool, "prevents_recurrence": bool, "evidenced": bool}
+    root_checks = db.Column(db.JSON, nullable=True)
 
     def to_dict(self) -> dict:
         return {
@@ -149,6 +216,10 @@ class WhyStep(db.Model):
             "question": self.question,
             "answer": self.answer,
             "is_root_cause": self.is_root_cause,
+            "cause_id": self.cause_id,
+            "evidence": self.evidence,
+            "evidence_kind": self.evidence_kind,
+            "root_checks": self.root_checks,
             "created_by": self.created_by,
             "created_at": self.created_at.isoformat(),
         }
@@ -171,6 +242,13 @@ class Action(db.Model):
     verified_by = db.Column(db.String(120), nullable=True)
     verified_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=_now, nullable=False)
+    # The why-step this action answers (usually a chain's root cause).
+    why_step_id = db.Column(db.String(36), db.ForeignKey("why_step.id", ondelete="SET NULL"), nullable=True)
+    # How anyone will know it worked, decided up front, and when to check.
+    verification_method = db.Column(db.Text, nullable=True)
+    effectiveness_check_date = db.Column(db.Date, nullable=True)
+    # What showed it worked, recorded when it's verified.
+    verification_evidence = db.Column(db.Text, nullable=True)
 
     def to_dict(self) -> dict:
         return {
@@ -184,6 +262,10 @@ class Action(db.Model):
             "verified_by": self.verified_by,
             "verified_at": self.verified_at.isoformat() if self.verified_at else None,
             "created_at": self.created_at.isoformat(),
+            "why_step_id": self.why_step_id,
+            "verification_method": self.verification_method,
+            "effectiveness_check_date": self.effectiveness_check_date.isoformat() if self.effectiveness_check_date else None,
+            "verification_evidence": self.verification_evidence,
         }
 
 

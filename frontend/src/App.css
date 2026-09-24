@@ -8,5 +8,11 @@
 .app-layout__body {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout__body > .cd-row {
+  flex: 1;
+  min-height: 0;
 }

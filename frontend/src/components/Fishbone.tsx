@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useAddFishboneCause, useDeleteFishboneCause, usePromoteFishboneCause } from '../api/hooks'
-import { FISHBONE_CATEGORIES, FISHBONE_CATEGORY_LABEL } from '../api/types'
+import { FISHBONE_CATEGORIES, FISHBONE_CATEGORY_LABEL, MAX_CHAINS } from '../api/types'
 import type { FishboneCategory, FishboneCause } from '../api/types'
+import { usePersona } from '../lib/persona'
 import './Fishbone.css'
 
 // Three categories above the spine, three below — the usual 6M split, in the fixed category
@@ -22,11 +23,8 @@ const BOTTOM_CATEGORIES = FISHBONE_CATEGORIES.slice(3)
 // being attached to each card's own edge.
 const BONE_POSITIONS = ['calc(16.6667% + 23px)', 'calc(50% + 23px)', 'calc(83.3333% + 23px)']
 
-/** The predecessor step to the Why chain — a brainstorm across the six fixed categories, not a
- * canvas and not a competing analysis mode. Its only job is generating candidate causes worth
- * promoting; promoting one is what actually starts the linear WhyChain below it. Only shows
- * once the chain has started if there's fishbone history to show — a case that always went
- * straight to the Why chain never grows this section.
+/** The Brainstorm step: candidate causes across the six fixed categories. Choosing a cause to
+ * chase (up to three) starts its own 5-Whys chain; the rest stay on the record as considered.
  *
  * Drawn as an actual Ishikawa skeleton: three category cards above a horizontal spine, three
  * below, each connected to it by a short 40°-angled bone centered under/over its card. The
@@ -35,22 +33,22 @@ const BONE_POSITIONS = ['calc(16.6667% + 23px)', 'calc(50% + 23px)', 'calc(83.33
 export default function Fishbone({
   incidentId,
   causes,
-  chainStarted,
   editing,
 }: {
   incidentId: string
   causes: FishboneCause[]
-  chainStarted: boolean
   editing: boolean
 }) {
   const addCause = useAddFishboneCause(incidentId)
   const deleteCause = useDeleteFishboneCause(incidentId)
   const promoteCause = usePromoteFishboneCause(incidentId)
+  const { persona } = usePersona()
 
-  if (chainStarted && causes.length === 0) return null
+  const chasing = causes.filter((c) => c.promoted_why_step_id).length
+  const canChase = editing && chasing < MAX_CHAINS
 
-  if (!editing && !chainStarted && causes.length === 0) {
-    return <p className="fishbone__empty">No causes brainstormed yet — click Edit to start.</p>
+  if (!editing && causes.length === 0) {
+    return <p className="fishbone__empty">No causes brainstormed.</p>
   }
 
   const causesFor = (cat: FishboneCategory) => causes.filter((c) => c.category === cat)
@@ -66,18 +64,18 @@ export default function Fishbone({
             <CauseChip
               key={cause.id}
               cause={cause}
-              chainStarted={chainStarted}
+              canChase={canChase}
               editing={editing}
-              onPromote={() => promoteCause.mutate(cause.id)}
+              onPromote={() => promoteCause.mutate({ causeId: cause.id, createdBy: persona?.name })}
               onDelete={() => deleteCause.mutate(cause.id)}
               promoting={promoteCause.isPending}
             />
           ))}
           {catCauses.length === 0 && !editing && <p className="fishbone__empty-cat">—</p>}
-          {editing && !chainStarted && (
+          {editing && (
             <AddCauseForm
               category={cat}
-              onAdd={(description) => addCause.mutate({ category: cat, description })}
+              onAdd={(description) => addCause.mutate({ category: cat, description, created_by: persona?.name })}
               pending={addCause.isPending}
             />
           )}
@@ -90,12 +88,10 @@ export default function Fishbone({
     <section className="fishbone">
       <div className="fishbone__head">
         <h2 className="fishbone__title">Fishbone brainstorm</h2>
-        {!chainStarted && (
-          <p className="fishbone__hint">
-            Candidate causes by category — not every category needs one. Promote the most
-            promising one to start the Why chain.
-          </p>
-        )}
+        <p className="fishbone__hint">
+          Possible causes by category. Not every category needs one. Choose up to {MAX_CHAINS} to chase
+          ({chasing} chosen); each gets its own 5 Whys.
+        </p>
       </div>
 
       <div className="fishbone__diagram">
@@ -132,14 +128,14 @@ function SpineBand({ topPicked, bottomPicked }: { topPicked: boolean[]; bottomPi
 
 function CauseChip({
   cause,
-  chainStarted,
+  canChase,
   editing,
   onPromote,
   onDelete,
   promoting,
 }: {
   cause: FishboneCause
-  chainStarted: boolean
+  canChase: boolean
   editing: boolean
   onPromote: () => void
   onDelete: () => void
@@ -148,12 +144,14 @@ function CauseChip({
   return (
     <div className={`fishbone-chip${cause.promoted_why_step_id ? ' fishbone-chip--promoted' : ''}`}>
       <span className="fishbone-chip__text">{cause.description}</span>
-      {cause.promoted_why_step_id && <span className="fishbone-chip__badge">Started the chain ↓</span>}
-      {editing && !chainStarted && !cause.promoted_why_step_id && (
+      {cause.promoted_why_step_id && <span className="fishbone-chip__badge">Chasing: has its own 5 Whys</span>}
+      {editing && !cause.promoted_why_step_id && (
         <div className="fishbone-chip__actions">
-          <button className="fishbone-chip__promote" onClick={onPromote} disabled={promoting}>
-            {promoting ? 'Promoting…' : 'Promote →'}
-          </button>
+          {canChase && (
+            <button className="fishbone-chip__promote" onClick={onPromote} disabled={promoting}>
+              {promoting ? 'Starting…' : 'Chase this →'}
+            </button>
+          )}
           <button className="fishbone-chip__delete" onClick={onDelete} title="Remove this cause">✕</button>
         </div>
       )}

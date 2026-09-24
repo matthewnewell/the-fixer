@@ -21,3 +21,5 @@ frontend/.vite/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+data-backup/

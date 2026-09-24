@@ -33,19 +33,6 @@
   color: var(--color-text-faint);
 }
 
-.new-case-form {
-  display: flex;
-  gap: 8px;
-}
-
-.new-case-form input {
-  padding: 8px 10px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  font-size: 13px;
-  width: 280px;
-}
 
 .cases-page__filters {
   display: flex;
@@ -134,5 +121,76 @@
 
 .case-card__root--found {
   color: var(--color-success);
+  font-weight: 700;
+}
+
+.new-case-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.new-case-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.new-case-form__field input,
+.new-case-form__field textarea,
+.new-case-form__field select {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--color-text);
+  background: var(--color-surface);
+  resize: vertical;
+}
+
+.new-case-form__opt {
+  font-weight: 400;
+  color: var(--color-text-faint);
+}
+
+.new-case-form__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.new-case-form__row .new-case-form__field {
+  min-width: 240px;
+}
+
+.new-case-form__as {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
+  align-self: center;
+}
+
+.case-card__stage {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.case-card__age {
+  color: var(--color-text-faint);
+}
+
+.case-card__overdue {
+  color: var(--color-critical);
   font-weight: 700;
 }

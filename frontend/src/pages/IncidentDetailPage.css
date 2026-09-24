@@ -5,35 +5,6 @@
   overflow: hidden;
 }
 
-.incident-layout__row {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-}
-
-.incident-layout__chat-tab {
-  flex-shrink: 0;
-  width: 40px;
-  border: none;
-  border-left: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  font-size: 12px;
-  font-weight: 700;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  padding: 16px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.incident-layout__chat-tab:hover {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-}
-
 .incident-detail {
   flex: 1;
   min-width: 0;
@@ -52,11 +23,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.incident-detail__header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-border);
 }
 
 .incident-detail__badges {
@@ -80,14 +46,6 @@
   color: var(--color-accent-hover);
 }
 
-.incident-detail__title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: nowrap;
-}
-
 .incident-detail__title {
   margin: 0;
   flex: 1;
@@ -97,82 +55,209 @@
   letter-spacing: -0.02em;
 }
 
-.incident-detail__title-actions {
+/* ── Root Cause / CAPA sub-nav — a segmented control, not an understated underline: the user
+   should see at a glance which half of the case they're looking at. ── */
+
+
+.incident-detail__inner {
+  max-width: 1240px;
+}
+
+.case-head {
+  margin-bottom: 14px;
+}
+
+.case-head__meta {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
+}
+
+.case-head__overdue {
+  color: var(--color-critical);
+  font-weight: 700;
+}
+
+a.incident-detail__badge {
+  text-decoration: none;
+}
+
+/* ── step bar ── */
+
+.steps {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.steps__step {
+  flex: 1;
+  min-width: 110px;
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
-}
-
-.incident-detail__desc {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-}
-
-.status-select {
-  flex-shrink: 0;
-  padding: 7px 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-strong);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  position: relative;
 }
 
-.status-select--open {
-  background: var(--color-wait-soft);
-  color: var(--color-wait);
-  border-color: transparent;
+.steps__step:hover {
+  border-color: var(--color-accent);
 }
 
-.status-select--investigating {
-  background: var(--color-accent-soft);
-  color: var(--color-accent-hover);
-  border-color: transparent;
-}
-
-.status-select--closed {
-  background: var(--color-success-soft);
-  color: var(--color-success);
-  border-color: transparent;
-}
-
-/* ── Root Cause / CAPA sub-nav — a segmented control, not an understated underline: the user
-   should see at a glance which half of the case they're looking at. ── */
-.incident-tabs {
+.steps__dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
   display: inline-flex;
-  gap: 2px;
-  padding: 3px;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 800;
   background: var(--color-surface-sunken);
-  border-radius: var(--radius-md);
-  width: fit-content;
+  flex-shrink: 0;
 }
 
-.incident-tabs__tab {
-  border: none;
-  background: none;
-  padding: 6px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-text-secondary);
+.steps__step--done .steps__dot {
+  background: var(--color-success);
+  color: #fff;
 }
 
-.incident-tabs__tab:hover {
+.steps__step--current .steps__dot {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.steps__step--on {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
   color: var(--color-text);
 }
 
-.incident-tabs__tab--active {
-  background: var(--color-surface);
+.steps__now {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
   color: var(--color-accent);
-  box-shadow: var(--shadow-sm);
 }
 
-.incident-detail__section {
+.steps__record {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.steps__record--on {
+  border-color: var(--color-text);
+  color: var(--color-text);
+}
+
+/* ── step body, with the Guide beside it ── */
+
+.case-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.case-body--guided {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+@media (max-width: 1100px) {
+  .case-body--guided {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.step-head__intro {
+  flex: 1;
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--color-text-secondary);
+}
+
+.step-head__guide {
+  flex-shrink: 0;
+}
+
+.next-step {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.describe {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+}
+
+.describe__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.describe__field--short {
+  max-width: 320px;
+}
+
+.describe__field input,
+.describe__field textarea,
+.describe__field select {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text);
+  background: var(--color-surface);
+  resize: vertical;
+}
+
+.describe__opt {
+  font-weight: 400;
+  color: var(--color-text-faint);
+}
+
+.describe__read,
+.closed-step {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  font-size: 14px;
 }

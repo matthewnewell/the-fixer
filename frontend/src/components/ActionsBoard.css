@@ -1,0 +1,255 @@
+.ab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ab__roots {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ab__root {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  background: var(--color-success-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.ab__root--open {
+  background: var(--color-wait-soft);
+}
+
+.ab__root-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-success);
+}
+
+.ab__root--open .ab__root-label {
+  color: var(--color-wait);
+}
+
+.ab__root-text {
+  font-weight: 600;
+  flex: 1;
+}
+
+.ab__root-count {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.ab__group-title {
+  font-size: 13.5px;
+  margin: 0 0 6px;
+}
+
+.ab__group-hint {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--color-text-faint);
+  margin-left: 6px;
+}
+
+.ab__none {
+  font-size: 12.5px;
+  color: var(--color-text-faint);
+  font-style: italic;
+  margin: 0;
+}
+
+.ab__error {
+  color: var(--color-critical);
+  font-size: 12.5px;
+}
+
+.ab-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 6px;
+}
+
+.ab-row--verified {
+  border-color: var(--color-success);
+}
+
+.ab-row__desc {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+.ab-row__meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 3px;
+}
+
+.ab-row__answers {
+  color: var(--color-accent);
+}
+
+.ab-row__overdue {
+  color: var(--color-critical);
+  font-weight: 700;
+}
+
+.ab-row__method,
+.ab-row__verified {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.ab-row__verified {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.ab-row__side {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.ab-row__side select {
+  padding: 4px 6px;
+  font-size: 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.ab-row__status {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-surface-sunken);
+}
+
+.ab-row__status--verified {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.ab-row__delete {
+  border: none;
+  background: none;
+  color: var(--color-text-faint);
+}
+
+.ab-row__verify {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--color-border);
+  padding-top: 8px;
+}
+
+.ab-form,
+.ab-close {
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ab-form__kinds {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.ab-form__kinds button {
+  border: none;
+  background: var(--color-surface);
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.ab-form__kinds .ab-form__kind--on {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.ab-form__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.ab-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.ab-form__field--short {
+  max-width: 220px;
+}
+
+.ab-form__field input,
+.ab-form__field textarea,
+.ab-form__field select {
+  padding: 7px 9px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text);
+  background: var(--color-surface);
+  resize: vertical;
+}
+
+.ab-form__row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ab-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ab-close__head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ab-close__hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.ab-close__gaps {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-wait);
+  font-weight: 600;
+}

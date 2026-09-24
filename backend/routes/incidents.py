@@ -1,8 +1,13 @@
+from datetime import date as date_cls
+
 from flask import Blueprint, jsonify, request
 
+import depot_client
 import journal
 from db import db
 from models import (
+    EVIDENCE_KINDS,
+    MAX_CHAINS,
     ACTION_KINDS,
     ACTION_STATUSES,
     FISHBONE_CATEGORIES,
@@ -31,8 +36,11 @@ def list_incidents():
 
 @bp.get("/projects")
 def list_projects():
+    """Project names to file or filter cases under: every project with a case, plus every project
+    Conway's Depot knows about (so a project's first case can be filed), when it's reachable."""
     rows = db.session.query(Incident.project).filter(Incident.project.isnot(None)).distinct().all()
-    return jsonify(sorted({r[0] for r in rows}))
+    names = {r[0] for r in rows} | set(depot_client.fetch_project_names() or [])
+    return jsonify(sorted(names))
 
 
 @bp.post("/incidents")
@@ -51,7 +59,32 @@ def create_incident():
     )
     db.session.add(incident)
     db.session.commit()
+    _milestone(incident, body, f'Opened a Fixer case: "{incident.title}".')
     return jsonify(incident.to_dict()), 201
+
+
+def _milestone(incident: Incident, body: dict, text: str) -> None:
+    """Post a case milestone to its project's Journal in the Depot, authored by whoever did it
+    (`person_id` from the request). Written by code from the change itself, never by the AI."""
+    depot_client.post_milestone(incident.project, body.get("person_id"), text)
+
+
+def _close_gaps(incident: Incident) -> list[str]:
+    """What's missing before a case can close cleanly."""
+    gaps = []
+    chains = incident.chains()
+    if not chains:
+        gaps.append("no 5-Whys chain")
+    elif not all(c["root_step_id"] for c in chains):
+        gaps.append("a chain without a root cause")
+    linked = {a.why_step_id for a in incident.actions if a.kind in ("corrective", "preventive")}
+    unanswered = [c for c in chains if c["root_step_id"] and c["root_step_id"] not in linked]
+    if unanswered:
+        gaps.append(f"{len(unanswered)} root cause{'s' if len(unanswered) != 1 else ''} with no corrective or preventive action")
+    unverified = [a for a in incident.actions if a.status != "verified"]
+    if unverified:
+        gaps.append(f"{len(unverified)} action{'s' if len(unverified) != 1 else ''} not verified")
+    return gaps
 
 
 @bp.get("/incidents/<incident_id>")
@@ -65,9 +98,19 @@ def update_incident(incident_id):
     incident = Incident.query.get_or_404(incident_id)
     body = request.get_json(force=True) or {}
 
+    closing = False
     if "status" in body:
         if body["status"] not in INCIDENT_STATUSES:
             return jsonify({"error": f"status must be one of {INCIDENT_STATUSES}"}), 400
+        closing = body["status"] == "closed" and incident.status != "closed"
+        if closing:
+            # Closing asks for a root cause on every chain and every action verified, or a
+            # stated reason for closing anyway.
+            gaps = _close_gaps(incident)
+            reason = (body.get("override_reason") or "").strip()
+            if gaps and not reason:
+                return jsonify({"error": "can't close yet: " + "; ".join(gaps), "gaps": gaps}), 409
+            incident.close_override_reason = reason if gaps else None
         incident.status = body["status"]
         incident.closed_at = _now() if body["status"] == "closed" else None
 
@@ -76,6 +119,11 @@ def update_incident(incident_id):
             setattr(incident, field, body[field])
 
     db.session.commit()
+    if closing:
+        roots = [w.answer for w in incident.why_steps if w.is_root_cause and w.answer]
+        _milestone(incident, body, f'Closed Fixer case "{incident.title}".'
+                   + (f" Root cause: {'; '.join(roots)}." if roots else "")
+                   + (f" Closed with open items: {incident.close_override_reason}" if incident.close_override_reason else ""))
     return jsonify(incident.to_dict())
 
 
@@ -124,23 +172,26 @@ def delete_fishbone_cause(cause_id):
 
 @bp.post("/fishbone-causes/<cause_id>/promote")
 def promote_fishbone_cause(cause_id):
-    """Starts the Why chain from this candidate cause — sequence 1, seeded with the cause's own
-    description as the answer. Only allowed while the chain is still empty: this app's chain is
-    one straight line, not a tree, so promoting a second cause once the first why is already
-    being asked would have nowhere real to go. See models.py's module docstring."""
+    """Starts a 5-Whys chain from this candidate cause: its first step is the cause itself, and
+    each why after that digs one level deeper. A case can chase up to MAX_CHAINS causes at
+    once, each on its own chain with its own root cause. See models.py's module docstring."""
     cause = FishboneCause.query.get_or_404(cause_id)
     if cause.promoted_why_step_id:
         return jsonify({"error": "this cause has already been promoted"}), 400
     incident = cause.incident
-    if incident.why_steps:
-        return jsonify({"error": "the Why chain already has steps — fishbone only starts a fresh chain"}), 400
+    promoted = sum(1 for c in incident.fishbone_causes if c.promoted_why_step_id)
+    if promoted >= MAX_CHAINS:
+        return jsonify({"error": f"a case can chase at most {MAX_CHAINS} causes at once"}), 400
 
+    body = request.get_json(force=True, silent=True) or {}
     step = WhyStep(
         incident_id=incident.id,
         sequence=1,
-        question="Why does this look like the cause?",
+        question="What could have caused this?",
         answer=cause.description,
-        created_by=cause.created_by,
+        created_by=(body.get("created_by") or "").strip() or cause.created_by,
+        cause_id=cause.id,
+        evidence_kind="hypothesis",
     )
     db.session.add(step)
     db.session.flush()
@@ -158,13 +209,20 @@ def add_why_step(incident_id):
     incident = Incident.query.get_or_404(incident_id)
     body = request.get_json(force=True) or {}
 
-    next_seq = (max((w.sequence for w in incident.why_steps), default=0)) + 1
+    cause_id = body.get("cause_id") or None  # which chain; none means the direct chain
+    if cause_id and not any(c.id == cause_id for c in incident.fishbone_causes):
+        return jsonify({"error": "cause_id isn't one of this case's causes"}), 400
+    chain = [w for w in incident.why_steps if w.cause_id == cause_id]
+    next_seq = (max((w.sequence for w in chain), default=0)) + 1
     step = WhyStep(
         incident_id=incident_id,
         sequence=next_seq,
-        question=(body.get("question") or "Why?").strip() or "Why?",
+        question=(body.get("question") or "Why did that happen?").strip() or "Why did that happen?",
         answer=(body.get("answer") or "").strip() or None,
         created_by=(body.get("created_by") or "").strip() or None,
+        cause_id=cause_id,
+        evidence=(body.get("evidence") or "").strip() or None,
+        evidence_kind=body.get("evidence_kind") if body.get("evidence_kind") in EVIDENCE_KINDS else None,
     )
     db.session.add(step)
     db.session.commit()
@@ -182,8 +240,30 @@ def update_why_step(step_id):
         step.answer = (body["answer"] or "").strip() or None
     if "question" in body:
         step.question = (body["question"] or "Why?").strip() or "Why?"
+    if "evidence" in body:
+        step.evidence = (body["evidence"] or "").strip() or None
+    if "evidence_kind" in body:
+        if body["evidence_kind"] not in (*EVIDENCE_KINDS, None):
+            return jsonify({"error": f"evidence_kind must be one of {EVIDENCE_KINDS}"}), 400
+        step.evidence_kind = body["evidence_kind"]
+    if "root_checks" in body:
+        step.root_checks = body["root_checks"]
+    marking_root = False
     if "is_root_cause" in body:
-        step.is_root_cause = bool(body["is_root_cause"])
+        want = bool(body["is_root_cause"])
+        if want and not step.is_root_cause:
+            # The root-cause test: something the org controls, that would have prevented this,
+            # and that the evidence backs up. All three, or it's another symptom.
+            checks = step.root_checks or {}
+            missing = [k for k in ("controllable", "prevents_recurrence", "evidenced") if not checks.get(k)]
+            if missing:
+                return jsonify({"error": "answer the root-cause test first", "missing": missing}), 400
+            # One root cause per chain.
+            for other in step.incident.why_steps:
+                if other.cause_id == step.cause_id and other.id != step.id:
+                    other.is_root_cause = False
+            marking_root = True
+        step.is_root_cause = want
 
     after = {f: getattr(step, f) for f in journal.WHY_STEP_FIELDS}
     journal.record_changes(
@@ -192,6 +272,8 @@ def update_why_step(step_id):
     )
 
     db.session.commit()
+    if marking_root:
+        _milestone(step.incident, body, f'Root cause found on Fixer case "{step.incident.title}": {step.answer}')
     return jsonify(step.to_dict())
 
 
@@ -217,12 +299,18 @@ def create_action(incident_id):
     if not description:
         return jsonify({"error": "description is required"}), 400
 
+    why_step_id = body.get("why_step_id") or None
+    if why_step_id and not WhyStep.query.filter_by(id=why_step_id, incident_id=incident_id).first():
+        return jsonify({"error": "why_step_id isn't a step on this case"}), 400
     action = Action(
         incident_id=incident_id,
         kind=kind,
         description=description,
         owner=(body.get("owner") or "").strip() or None,
-        due_date=body.get("due_date") or None,
+        due_date=_date(body.get("due_date")),
+        why_step_id=why_step_id,
+        verification_method=(body.get("verification_method") or "").strip() or None,
+        effectiveness_check_date=_date(body.get("effectiveness_check_date")),
     )
     db.session.add(action)
     db.session.commit()
@@ -246,20 +334,32 @@ def update_action(action_id):
     if "status" in body:
         if body["status"] not in ACTION_STATUSES:
             return jsonify({"error": f"status must be one of {ACTION_STATUSES}"}), 400
+        verifying = body["status"] == "verified" and action.status != "verified"
         action.status = body["status"]
         if body["status"] == "verified":
             verified_by = (body.get("verified_by") or "").strip()
+            evidence = (body.get("verification_evidence") or action.verification_evidence or "").strip()
             if not verified_by:
                 return jsonify({"error": "verified_by is required to verify an action"}), 400
+            if not evidence:
+                return jsonify({"error": "say what showed it worked (verification_evidence) to verify it"}), 400
             action.verified_by = verified_by
+            action.verification_evidence = evidence
             action.verified_at = _now()
         else:
             action.verified_by = None
             action.verified_at = None
+    else:
+        verifying = False
 
-    for field in ("description", "owner", "due_date"):
+    for field in ("description", "owner", "verification_method"):
         if field in body:
-            setattr(action, field, body[field])
+            setattr(action, field, (body[field] or "").strip() or None)
+    for field in ("due_date", "effectiveness_check_date"):
+        if field in body:
+            setattr(action, field, _date(body[field]))
+    if "why_step_id" in body:
+        action.why_step_id = body["why_step_id"] or None
 
     after = {f: getattr(action, f) for f in journal.ACTION_FIELDS}
     # verified_by doubles as the author when the change in question IS the verification — the
@@ -272,7 +372,19 @@ def update_action(action_id):
     )
 
     db.session.commit()
+    if verifying:
+        _milestone(action.incident, body, f'{action.kind.capitalize()} action verified on Fixer case "{action.incident.title}": '
+                   f'{action.description} Evidence: {action.verification_evidence}')
     return jsonify(action.to_dict())
+
+
+def _date(value):
+    """An ISO date string, a date, or blank -> a date or None."""
+    if not value:
+        return None
+    if isinstance(value, date_cls):
+        return value
+    return date_cls.fromisoformat(str(value)[:10])
 
 
 @bp.delete("/actions/<action_id>")

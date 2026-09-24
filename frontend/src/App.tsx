@@ -1,10 +1,9 @@
-import { DepotBackBar } from '@conways/drawer'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { PersonaProvider } from './lib/persona'
 import Nav from './components/Nav'
 import SplashPage from './pages/SplashPage'
 import CasesPage from './pages/CasesPage'
 import IncidentDetailPage from './pages/IncidentDetailPage'
-import CapaPlanPage from './pages/CapaPlanPage'
 import './App.css'
 
 /** Shared chrome for every operational page — same pattern as the sibling apps: the splash
@@ -20,16 +19,21 @@ function Layout({ children }: { children: React.ReactNode }) {
   )
 }
 
+/** The old "Generate Report" page: the case's own Record replaced it. */
+function RecordRedirect() {
+  const { incidentId } = useParams<{ incidentId: string }>()
+  return <Navigate to={`/incidents/${incidentId}?view=record`} replace />
+}
+
 export default function App() {
   return (
-    <>
-      <DepotBackBar />
+    <PersonaProvider>
       <Routes>
-      <Route path="/about" element={<SplashPage />} />
-      <Route path="/" element={<Layout><CasesPage /></Layout>} />
-      <Route path="/incidents/:incidentId" element={<IncidentDetailPage />} />
-      <Route path="/incidents/:incidentId/plan" element={<CapaPlanPage />} />
+        <Route path="/about" element={<SplashPage />} />
+        <Route path="/" element={<Layout><CasesPage /></Layout>} />
+        <Route path="/incidents/:incidentId" element={<IncidentDetailPage />} />
+        <Route path="/incidents/:incidentId/plan" element={<RecordRedirect />} />
       </Routes>
-    </>
+    </PersonaProvider>
   )
 }

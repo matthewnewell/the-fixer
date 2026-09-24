@@ -36,7 +36,30 @@ def _set_sqlite_pragma(dbapi_conn, connection_record):
 # data to worry about yet; revisit only if a destructive change is ever needed.
 _MIGRATIONS: list[tuple[str, str, str]] = [
     ("incident", "portfolio", "ALTER TABLE incident ADD COLUMN portfolio VARCHAR(200)"),
+    ("incident", "close_override_reason", "ALTER TABLE incident ADD COLUMN close_override_reason TEXT"),
+    ("why_step", "cause_id", "ALTER TABLE why_step ADD COLUMN cause_id VARCHAR(36)"),
+    ("why_step", "evidence", "ALTER TABLE why_step ADD COLUMN evidence TEXT"),
+    ("why_step", "evidence_kind", "ALTER TABLE why_step ADD COLUMN evidence_kind VARCHAR(20)"),
+    ("why_step", "root_checks", "ALTER TABLE why_step ADD COLUMN root_checks JSON"),
+    ("action", "why_step_id", "ALTER TABLE action ADD COLUMN why_step_id VARCHAR(36)"),
+    ("action", "verification_method", "ALTER TABLE action ADD COLUMN verification_method TEXT"),
+    ("action", "effectiveness_check_date", "ALTER TABLE action ADD COLUMN effectiveness_check_date DATE"),
+    ("action", "verification_evidence", "ALTER TABLE action ADD COLUMN verification_evidence TEXT"),
 ]
+
+
+# One-time data fixes, each run only in the startup that adds the column it depends on.
+_BACKFILLS: dict[tuple[str, str], list[str]] = {("why_step", "cause_id"): [
+    # Chains used to be one per case: tie every step of a case to the cause that started it, so
+    # the one old chain becomes that cause's chain now that a case can have several.
+    """UPDATE why_step SET cause_id = (
+         SELECT fc.id FROM fishbone_cause fc
+         WHERE fc.incident_id = why_step.incident_id AND fc.promoted_why_step_id IS NOT NULL
+         LIMIT 1)
+       WHERE cause_id IS NULL AND EXISTS (
+         SELECT 1 FROM fishbone_cause fc
+         WHERE fc.incident_id = why_step.incident_id AND fc.promoted_why_step_id IS NOT NULL)""",
+]}
 
 
 def _run_migrations(app):
@@ -50,6 +73,8 @@ def _run_migrations(app):
                 cols = {c["name"] for c in inspector.get_columns(table_name)}
                 if col_name not in cols:
                     conn.execute(text(alter_sql))
+                    for sql in _BACKFILLS.get((table_name, col_name), []):
+                        conn.execute(text(sql))
 
 
 def init_db(app):

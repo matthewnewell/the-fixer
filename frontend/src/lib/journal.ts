@@ -1,24 +1,4 @@
-// The journal has no auth — "who" is just a name the browser remembers. Ported from Value
-// Stream's lib/journal.ts.
-
-const AUTHOR_KEY = 'fx:journal-author'
-
-export function getAuthor(): string {
-  try {
-    return localStorage.getItem(AUTHOR_KEY) ?? ''
-  } catch {
-    return ''
-  }
-}
-
-export function setAuthor(name: string): void {
-  try {
-    const trimmed = name.trim()
-    if (trimmed) localStorage.setItem(AUTHOR_KEY, trimmed)
-  } catch {
-    // private window / storage blocked — the entry just posts without an author
-  }
-}
+// Journal display helpers. Who wrote an entry comes from the "viewing as" persona (lib/persona.tsx).
 
 /** "just now" / "6m ago" / "3h ago" / "yesterday" / "Sep 8" / "Sep 8, 2025". */
 export function relativeTime(iso: string): string {

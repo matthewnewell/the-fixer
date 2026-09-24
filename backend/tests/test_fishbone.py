@@ -62,16 +62,19 @@ def test_promote_starts_the_why_chain(client):
     assert incident["why_count"] == 1
 
 
-def test_cannot_promote_once_chain_has_started(client):
+def test_each_promoted_cause_gets_its_own_chain_up_to_three(client):
     incident_id = _new_incident(client)
-    client.post(f"/api/incidents/{incident_id}/why-steps", json={"answer": "Something"})
+    causes = [client.post(f"/api/incidents/{incident_id}/fishbone-causes", json={
+        "category": "man", "description": f"Cause {n}",
+    }).get_json() for n in range(4)]
+    for c in causes[:3]:
+        assert client.post(f"/api/fishbone-causes/{c['id']}/promote").status_code == 201
+    assert client.post(f"/api/fishbone-causes/{causes[3]['id']}/promote").status_code == 400
 
-    cause = client.post(f"/api/incidents/{incident_id}/fishbone-causes", json={
-        "category": "man", "description": "Backup operators not cross-trained",
-    }).get_json()
-
-    res = client.post(f"/api/fishbone-causes/{cause['id']}/promote")
-    assert res.status_code == 400
+    client.post(f"/api/incidents/{incident_id}/why-steps", json={"cause_id": causes[0]["id"], "answer": "Deeper"})
+    chains = client.get(f"/api/incidents/{incident_id}").get_json()["chains"]
+    assert [len(c["steps"]) for c in chains] == [2, 1, 1]
+    assert chains[0]["steps"][1]["sequence"] == 2
 
 
 def test_cannot_promote_the_same_cause_twice(client):

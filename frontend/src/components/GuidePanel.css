@@ -1,0 +1,148 @@
+.guide {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+  max-height: calc(100vh - 200px);
+  min-height: 360px;
+  position: sticky;
+  top: 12px;
+}
+
+.guide__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.guide__close {
+  border: none;
+  background: none;
+  color: var(--color-text-faint);
+}
+
+.guide__off {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.guide__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.guide__turn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guide__turn--user {
+  align-items: flex-end;
+}
+
+.guide__bubble {
+  max-width: 92%;
+  padding: 8px 11px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  background: var(--color-surface-sunken);
+}
+
+.guide__turn--user .guide__bubble {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.guide-card {
+  border: 1px dashed var(--color-accent);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  background: var(--color-accent-soft);
+  font-size: 12.5px;
+}
+
+.guide-card--added {
+  border-style: solid;
+  opacity: 0.75;
+}
+
+.guide-card__kind {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+}
+
+.guide-card__text {
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.guide-card__sub {
+  margin-top: 3px;
+  color: var(--color-text-secondary);
+}
+
+.guide-card__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.guide-card__actions .fx-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.guide-card__done {
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.guide__thinking {
+  font-size: 12.5px;
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.guide__error {
+  font-size: 12.5px;
+  color: var(--color-critical);
+}
+
+.guide__composer {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px 4px;
+  border-top: 1px solid var(--color-border);
+}
+
+.guide__composer textarea {
+  flex: 1;
+  resize: none;
+  padding: 7px 9px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.guide__note {
+  margin: 0;
+  padding: 2px 14px 10px;
+  font-size: 11px;
+  color: var(--color-text-faint);
+}

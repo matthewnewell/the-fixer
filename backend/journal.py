@@ -14,6 +14,8 @@ from models import IncidentEvent
 WHY_STEP_FIELDS = {
     "question": "question",
     "answer": "answer",
+    "evidence": "evidence",
+    "evidence_kind": "evidence is",
     "is_root_cause": "root cause",
 }
 
@@ -23,6 +25,9 @@ ACTION_FIELDS = {
     "due_date": "due date",
     "status": "status",
     "verified_by": "verified by",
+    "verification_method": "how we'll know it worked",
+    "effectiveness_check_date": "effectiveness check",
+    "verification_evidence": "verification evidence",
 }
 
 
