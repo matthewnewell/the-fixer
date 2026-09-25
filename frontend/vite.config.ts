@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { conwaysDrawer } from '@conways/drawer/vite'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), conwaysDrawer()],
   server: {
     port: 5177,
     proxy: {
